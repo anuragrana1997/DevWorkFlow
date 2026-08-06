@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevFlow Build Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0D12;
+    --panel:#151822;
+    --panel-alt:#1B1F2B;
+    --border:#262B3A;
+    --text:#E8EAF0;
+    --text-dim:#9096A8;
+    --text-faint:#565D70;
+    --todo:#6B7280;
+    --progress:#F2A93B;
+    --done:#34D399;
+    --signature:#7C6CFF;
+    --radius:10px;
+    --radius-sm:7px;
+    --font-mono:'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+    --font-sans:'Inter', system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    min-height:100vh;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:28px 20px 64px;}
+
+  .topbar{display:flex;flex-direction:column;gap:6px;margin-bottom:26px;border-left:3px solid var(--signature);padding-left:16px;}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--text-faint);text-transform:uppercase;}
+  .topbar h1{font-family:var(--font-mono);font-size:26px;font-weight:700;letter-spacing:-0.01em;margin:0;}
+  .topbar p{color:var(--text-dim);font-size:14px;line-height:1.55;max-width:64ch;margin:2px 0 0;}
+
+  .stats{display:grid;grid-template-columns:132px repeat(3,1fr);gap:12px;margin-bottom:12px;}
+  .stat-tile{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;justify-content:center;}
+  .stat-tile .label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px;}
+  .stat-tile .value{font-family:var(--font-mono);font-size:21px;font-weight:600;}
+
+  .ring-tile{position:relative;align-items:center;padding:10px;}
+  .ring-svg{width:92px;height:92px;transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:var(--border);stroke-width:8;}
+  .ring-fg{fill:none;stroke:var(--signature);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .4s ease;}
+  .ring-center{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-value{font-family:var(--font-mono);font-weight:700;font-size:18px;}
+  .ring-caption{font-family:var(--font-mono);font-size:8.5px;letter-spacing:.1em;color:var(--text-faint);margin-top:1px;}
+
+  .heatmap-row{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;}
+  .heatmap-row .label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;color:var(--text-faint);text-transform:uppercase;margin-bottom:10px;}
+  .heatmap{display:flex;gap:6px;flex-wrap:wrap;}
+  .heat-cell{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--panel-alt);color:var(--text-faint);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;cursor:pointer;padding:0;transition:background .2s ease, border-color .2s ease;}
+  .heat-cell:hover{border-color:var(--signature);}
+  .heat-cell[data-level="1"]{background:#2A2E3E;color:var(--text-dim);}
+  .heat-cell[data-level="2"]{background:#3A3350;color:var(--text);}
+  .heat-cell[data-level="3"]{background:#54468C;color:var(--text);}
+  .heat-cell[data-level="4"]{background:var(--signature);color:#0B0D12;border-color:var(--signature);}
+
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;}
+  .column{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;min-width:0;}
+  .column-head{display:flex;align-items:center;gap:8px;padding:13px 15px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);}
+  .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .dot-todo{background:var(--todo);}
+  .dot-progress{background:var(--progress);}
+  .dot-done{background:var(--done);}
+  .count{margin-left:auto;font-family:var(--font-mono);background:var(--panel-alt);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--text-dim);}
+  .column-body{padding:11px;display:flex;flex-direction:column;gap:9px;min-height:48px;}
+  .empty{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);text-align:center;padding:10px 0;margin:0;}
+
+  .card{background:var(--panel-alt);border:1px solid var(--border);border-left:3px solid transparent;border-radius:var(--radius-sm);overflow:hidden;}
+  .card[data-status="todo"]{border-left-color:var(--todo);}
+  .card[data-status="progress"]{border-left-color:var(--progress);}
+  .card[data-status="done"]{border-left-color:var(--done);}
+  .card[data-status="todo"] .mini-bar-fill{background:var(--todo);}
+  .card[data-status="progress"] .mini-bar-fill{background:var(--progress);}
+  .card[data-status="done"] .mini-bar-fill{background:var(--done);}
+
+  .card-head{display:block;width:100%;background:transparent;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:12px 13px;}
+  .card-head-top{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.03em;margin-bottom:7px;}
+  .card-title{font-weight:600;font-size:13.5px;line-height:1.35;color:var(--text);margin-bottom:9px;}
+  .mini-bar{height:4px;border-radius:3px;background:var(--border);overflow:hidden;}
+  .mini-bar-fill{height:100%;transition:width .3s ease;}
+
+  .card-body{padding:0 13px 13px;border-top:1px solid var(--border);padding-top:11px;}
+  .subtasks{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .subtasks label{display:flex;align-items:flex-start;gap:8px;cursor:pointer;}
+  .subtasks input[type="checkbox"]{appearance:none;width:15px;height:15px;margin-top:2px;flex-shrink:0;border:1.5px solid var(--border);border-radius:4px;background:var(--panel);display:grid;place-content:center;cursor:pointer;}
+  .subtasks input[type="checkbox"]:checked{background:var(--done);border-color:var(--done);}
+  .subtasks input[type="checkbox"]:checked::after{content:'✓';font-size:10px;line-height:1;color:#06110c;}
+  .subtasks input[type="checkbox"]:focus-visible{outline:2px solid var(--signature);outline-offset:2px;}
+  .subtasks span{font-size:12.5px;line-height:1.45;color:var(--text-dim);}
+  .subtasks input:checked + span{color:var(--text-faint);text-decoration:line-through;}
+
+  .start-btn{display:block;background:none;border:none;color:var(--signature);font-family:var(--font-mono);font-size:11.5px;cursor:pointer;padding:2px 0 8px;text-align:left;}
+  .start-btn:hover{text-decoration:underline;}
+
+  .card-footer{display:flex;flex-direction:column;gap:9px;margin-top:8px;padding-top:10px;border-top:1px solid var(--border);}
+  .hours-field{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:11.5px;color:var(--text-dim);}
+  .hours-field input{width:60px;background:var(--panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--font-mono);font-size:12px;padding:4px 6px;text-align:right;}
+  textarea{width:100%;min-height:56px;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-sans);font-size:12px;padding:8px;resize:vertical;}
+  textarea::placeholder{color:var(--text-faint);}
+
+  input:focus-visible, textarea:focus-visible, button:focus-visible{outline:2px solid var(--signature);outline-offset:2px;}
+
+  .footer{display:flex;align-items:center;gap:14px;margin-top:22px;flex-wrap:wrap;}
+  .reset-btn{background:var(--panel);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono);font-size:11.5px;padding:8px 14px;border-radius:7px;cursor:pointer;}
+  .reset-btn:hover{border-color:var(--text-faint);color:var(--text);}
+  .reset-btn.armed{border-color:var(--progress);color:var(--progress);}
+  .footer-note{font-family:var(--font-mono);font-size:11px;color:var(--text-faint);margin:0;}
+  .footer-note.warn{color:var(--progress);}
+
+  @media (max-width: 860px){
+    .board{grid-template-columns:1fr;}
+  }
+  @media (max-width: 640px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .ring-tile{grid-column:span 2;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <span class="eyebrow">DevFlow · Build Sprint</span>
+    <h1>Build Tracker</h1>
+    <p>14 sprints, 3–4 focused hours each, from empty repo to a deployed Kanban app. Every subtask you check moves that day's card across this board — the same board DevFlow itself is built to manage.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-tile ring-tile">
+      <svg class="ring-svg" viewBox="0 0 84 84">
+        <circle cx="42" cy="42" r="36" class="ring-bg"></circle>
+        <circle cx="42" cy="42" r="36" class="ring-fg" id="ring-fg"></circle>
+      </svg>
+      <div class="ring-center">
+        <span class="ring-value" id="ring-label">0%</span>
+        <span class="ring-caption">SPRINT</span>
+      </div>
+    </div>
+    <div class="stat-tile">
+      <span class="label">Subtasks done</span>
+      <span class="value" id="stat-subtasks">0 / 0</span>
+    </div>
+    <div class="stat-tile">
+      <span class="label">Hours logged</span>
+      <span class="value" id="stat-hours">0 / 0</span>
+    </div>
+    <div class="stat-tile">
+      <span class="label">Streak</span>
+      <span class="value" id="stat-streak">0 days</span>
+    </div>
+  </div>
+
+  <div class="heatmap-row">
+    <span class="label">14-day activity</span>
+    <div class="heatmap" id="heatmap"></div>
+  </div>
+
+  <main class="board" id="board">
+    <div class="column" data-col="todo">
+      <div class="column-head"><span class="dot dot-todo"></span>To Do<span class="count" id="count-todo">0</span></div>
+      <div class="column-body" id="col-todo"></div>
+    </div>
+    <div class="column" data-col="progress">
+      <div class="column-head"><span class="dot dot-progress"></span>In Progress<span class="count" id="count-progress">0</span></div>
+      <div class="column-body" id="col-progress"></div>
+    </div>
+    <div class="column" data-col="done">
+      <div class="column-head"><span class="dot dot-done"></span>Completed<span class="count" id="count-done">0</span></div>
+      <div class="column-body" id="col-done"></div>
+    </div>
+  </main>
+
+  <div class="footer">
+    <button type="button" class="reset-btn" id="reset-btn">Reset all progress</button>
+    <p class="footer-note" id="footer-note"></p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const DAYS = [
+    {id:1, week:1, title:'Project Setup & Architecture', subtasks:[
+      'Initialize the Git repo and connect the GitHub remote',
+      'Scaffold client/ and server/ folders',
+      'Stand up an Express server skeleton with a health-check route',
+      'Configure the MySQL connection with pooling and env vars',
+      'Sketch the ERD: users, projects, members, tasks, comments, activity_logs',
+      'Set up ESLint, Prettier, and nodemon'
+    ]},
+    {id:2, week:1, title:'Database Schema & Models', subtasks:[
+      'Write the normalized MySQL schema with foreign keys',
+      'Add indexes for common lookups (project_id, assignee_id)',
+      'Create a seed script with sample users, projects, and tasks',
+      'Choose a query layer (raw SQL, Knex, or Sequelize) and wire it up',
+      'Verify CRUD queries against every table manually'
+    ]},
+    {id:3, week:1, title:'Authentication — JWT & bcrypt', subtasks:[
+      'Build POST /auth/register with bcrypt password hashing',
+      'Build POST /auth/login that issues a JWT',
+      'Write auth middleware to verify tokens on protected routes',
+      'Add email/password validation with express-validator',
+      'Test the full auth flow in Postman',
+      'Handle duplicate-email and bad-credential error cases'
+    ]},
+    {id:4, week:1, title:'Roles & Project Management API', subtasks:[
+      'Define owner / member / viewer roles in the data model',
+      'Write RBAC middleware that checks role per route',
+      'Build project CRUD endpoints',
+      'Build an "add team member to project" endpoint',
+      'Wire up centralized error-handling middleware',
+      'Test permission boundaries for each role'
+    ]},
+    {id:5, week:1, title:'Task CRUD & Kanban Status', subtasks:[
+      'Design the task model: status, priority, deadline, labels, assignee',
+      'Build task CRUD endpoints',
+      'Build the status-change endpoint (To Do / In Progress / Completed)',
+      'Add filtering and sorting query params',
+      'Add pagination to the task-list endpoint',
+      'Test the full task lifecycle in Postman'
+    ]},
+    {id:6, week:1, title:'Comments, Activity Log & Validation', subtasks:[
+      'Build comment endpoints (add / list / delete per task)',
+      'Auto-generate activity-log entries on task and project changes',
+      'Build an activity-log fetch endpoint per project',
+      'Tighten input validation across every route',
+      'Standardize the error-response shape',
+      'Build a dashboard-stats endpoint (counts by status, overdue)'
+    ]},
+    {id:7, week:1, title:'Backend Testing & API Docs', subtasks:[
+      'Write Jest unit tests for auth and validation logic',
+      'Write Supertest integration tests for the core routes',
+      'Set up Swagger/OpenAPI docs for the full API',
+      'Export a Postman collection',
+      'Fix bugs surfaced by the tests',
+      'Commit, push, and tag the backend-complete milestone'
+    ]},
+    {id:8, week:2, title:'React Setup & Auth UI', subtasks:[
+      'Scaffold the React app and React Router',
+      'Create an Axios instance with a JWT-attaching interceptor',
+      'Set up Context API or Redux Toolkit for auth state',
+      'Build the Register page with form validation',
+      'Build the Login page with form validation',
+      'Build a ProtectedRoute wrapper'
+    ]},
+    {id:9, week:2, title:'Dashboard & Project Management UI', subtasks:[
+      'Build the dashboard layout with stat cards',
+      'Build the project list view',
+      'Build create-project and join-project flows',
+      'Build the project settings / manage-members page',
+      'Extract reusable UI primitives — Button, Card, Modal, Input'
+    ]},
+    {id:10, week:2, title:'Kanban Board UI', subtasks:[
+      'Build the three-column Kanban layout',
+      'Build task cards with priority, label, and deadline badges',
+      'Wire up status changes (drag-and-drop or click-to-move)',
+      'Build the create/edit task modal',
+      'Add loading and empty states to the board'
+    ]},
+    {id:11, week:2, title:'Task Detail, Comments & Activity UI', subtasks:[
+      'Build the task detail view/modal',
+      'Build the comment thread UI',
+      'Build the activity-history timeline UI',
+      'Build assignee, label, and priority editors',
+      'Add optimistic UI updates for task changes'
+    ]},
+    {id:12, week:2, title:'Search, Filter, Sort & Stats', subtasks:[
+      'Add a debounced search bar for tasks and projects',
+      'Build filter controls — status, assignee, priority, label',
+      'Build sort controls — due date, priority, created date',
+      'Build a pagination component',
+      'Add dashboard charts for task and project stats'
+    ]},
+    {id:13, week:2, title:'Frontend Testing & Polish', subtasks:[
+      'Write React Testing Library tests for key components',
+      'Do a responsive pass down to mobile breakpoints',
+      'Do an accessibility pass — keyboard nav, focus states, aria labels',
+      'Add an error boundary and toast notifications',
+      'Spot-check the app in a second browser'
+    ]},
+    {id:14, week:2, title:'Docker, Deployment & Wrap-up', subtasks:[
+      'Write Dockerfiles for the client and server',
+      'Write docker-compose with a MySQL service',
+      'Document environment variables in .env.example',
+      'Deploy the backend and frontend',
+      'Run a full end-to-end QA pass',
+      'Polish the README and record a demo walkthrough'
+    ]}
+  ];
+  const HOURS_TARGET_PER_DAY = 3.5;
+  const STORAGE_KEY = 'devflow-tracker-state';
+
+  const board = {
+    todo: document.getElementById('col-todo'),
+    progress: document.getElementById('col-progress'),
+    done: document.getElementById('col-done')
+  };
+  const countEls = {
+    todo: document.getElementById('count-todo'),
+    progress: document.getElementById('count-progress'),
+    done: document.getElementById('count-done')
+  };
+  const heatmapEl = document.getElementById('heatmap');
+  const ringFg = document.getElementById('ring-fg');
+  const ringLabel = document.getElementById('ring-label');
+  const subtasksValueEl = document.getElementById('stat-subtasks');
+  const hoursValueEl = document.getElementById('stat-hours');
+  const streakValueEl = document.getElementById('stat-streak');
+  const footerNote = document.getElementById('footer-note');
+  const resetBtn = document.getElementById('reset-btn');
+  const boardEl = document.getElementById('board');
+
+  let state = null;
+  let expanded = new Set();
+  let storageOk = true;
+  let resetArmed = false;
+  let resetTimer = null;
+  let notesTimer = null;
+
+  function defaultState(){
+    const days = {};
+    DAYS.forEach(d => { days[d.id] = { checked: d.subtasks.map(() => false), hours: 0, notes: '', started: false }; });
+    return { days };
+  }
+
+  async function loadState(){
+    try {
+      const res = await window.storage.get(STORAGE_KEY, false);
+      if (res && res.value) {
+        const parsed = JSON.parse(res.value);
+        if (parsed && parsed.days) return parsed;
+      }
+      return defaultState();
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  async function persist(){
+    try {
+      const res = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      storageOk = !!res;
+    } catch (e) {
+      storageOk = false;
+    }
+    updateFooterNote();
+  }
+
+  function updateFooterNote(){
+    footerNote.textContent = storageOk
+      ? 'Progress saves automatically and picks up where you left off.'
+      : "Couldn't save just now — progress may not persist if you leave.";
+    footerNote.classList.toggle('warn', !storageOk);
+  }
+
+  function statusFor(day){
+    const ds = state.days[day.id];
+    const total = day.subtasks.length;
+    const done = ds.checked.filter(Boolean).length;
+    if (done === total) return 'done';
+    if (done > 0 || ds.started) return 'progress';
+    return 'todo';
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  function cardHtml(day){
+    const ds = state.days[day.id];
+    const total = day.subtasks.length;
+    const done = ds.checked.filter(Boolean).length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const status = statusFor(day);
+    const isExpanded = expanded.has(day.id);
+    const dayNum = String(day.id).padStart(2, '0');
+
+    const subtasksHtml = day.subtasks.map((label, i) => `
+      <li>
+        <label>
+          <input type="checkbox" data-role="subtask" data-day="${day.id}" data-idx="${i}" ${ds.checked[i] ? 'checked' : ''}>
+          <span>${escapeHtml(label)}</span>
+        </label>
+      </li>
+    `).join('');
+
+    const startBtn = status === 'todo'
+      ? `<button type="button" class="start-btn" data-role="start" data-day="${day.id}">Start day →</button>`
+      : '';
+
+    const mark = status === 'done' ? '✓ ' : '';
+
+    return `
+      <article class="card" data-day="${day.id}" data-status="${status}">
+        <button type="button" class="card-head" data-role="toggle" data-day="${day.id}" aria-expanded="${isExpanded}">
+          <div class="card-head-top">
+            <span>DAY ${dayNum} · WK${day.week}</span>
+            <span>${mark}${done}/${total}</span>
+          </div>
+          <div class="card-title">${escapeHtml(day.title)}</div>
+          <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
+        </button>
+        <div class="card-body" ${isExpanded ? '' : 'hidden'}>
+          <ul class="subtasks">${subtasksHtml}</ul>
+          ${startBtn}
+          <div class="card-footer">
+            <label class="hours-field">
+              <span>Hours logged</span>
+              <input type="number" min="0" max="12" step="0.5" value="${ds.hours}" data-role="hours" data-day="${day.id}">
+            </label>
+            <textarea placeholder="Notes — blockers, decisions, links…" data-role="notes" data-day="${day.id}">${escapeHtml(ds.notes)}</textarea>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function emptyHtml(){ return `<p class="empty">Nothing here yet.</p>`; }
+
+  function render(){
+    const groups = { todo: [], progress: [], done: [] };
+    DAYS.forEach(day => groups[statusFor(day)].push(day));
+
+    board.todo.innerHTML = groups.todo.map(cardHtml).join('') || emptyHtml();
+    board.progress.innerHTML = groups.progress.map(cardHtml).join('') || emptyHtml();
+    board.done.innerHTML = groups.done.map(cardHtml).join('') || emptyHtml();
+
+    countEls.todo.textContent = groups.todo.length;
+    countEls.progress.textContent = groups.progress.length;
+    countEls.done.textContent = groups.done.length;
+
+    renderStats();
+    renderHeatmap();
+  }
+
+  function round1(n){ return Math.round(n * 10) / 10; }
+
+  function renderStats(){
+    let totalSub = 0, doneSub = 0, totalHours = 0;
+    DAYS.forEach(day => {
+      const ds = state.days[day.id];
+      totalSub += day.subtasks.length;
+      doneSub += ds.checked.filter(Boolean).length;
+      totalHours += Number(ds.hours) || 0;
+    });
+    const pct = totalSub ? Math.round((doneSub / totalSub) * 100) : 0;
+    const circumference = 2 * Math.PI * 36;
+    ringFg.setAttribute('stroke-dasharray', `${circumference}`);
+    ringFg.setAttribute('stroke-dashoffset', `${circumference * (1 - pct / 100)}`);
+    ringLabel.textContent = pct + '%';
+
+    subtasksValueEl.textContent = `${doneSub} / ${totalSub}`;
+    hoursValueEl.textContent = `${round1(totalHours)} / ${DAYS.length * HOURS_TARGET_PER_DAY}`;
+
+    let streak = 0;
+    for (const day of DAYS) {
+      const ds = state.days[day.id];
+      const total = day.subtasks.length;
+      const done = ds.checked.filter(Boolean).length;
+      if (done === total) streak++; else break;
+    }
+    streakValueEl.textContent = `${streak} ${streak === 1 ? 'day' : 'days'} 🔥`;
+  }
+
+  function renderHeatmap(){
+    heatmapEl.innerHTML = DAYS.map(day => {
+      const ds = state.days[day.id];
+      const hrs = Number(ds.hours) || 0;
+      const ratio = Math.min(hrs / HOURS_TARGET_PER_DAY, 1);
+      let level = 0;
+      if (hrs > 0) level = ratio >= 1 ? 4 : ratio >= 0.66 ? 3 : ratio >= 0.33 ? 2 : 1;
+      return `<button type="button" class="heat-cell" data-role="heat" data-day="${day.id}" data-level="${level}" title="Day ${day.id} · ${hrs}h logged">${day.id}</button>`;
+    }).join('');
+  }
+
+  function toggleExpand(dayId){
+    if (expanded.has(dayId)) expanded.delete(dayId); else expanded.add(dayId);
+    render();
+  }
+
+  function prefersReducedMotion(){
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  boardEl.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-role="toggle"]');
+    if (toggle) { toggleExpand(Number(toggle.dataset.day)); return; }
+    const startBtn = e.target.closest('[data-role="start"]');
+    if (startBtn) {
+      const id = Number(startBtn.dataset.day);
+      state.days[id].started = true;
+      persist(); render();
+    }
+  });
+
+  boardEl.addEventListener('change', (e) => {
+    const cb = e.target.closest('[data-role="subtask"]');
+    if (cb) {
+      const id = Number(cb.dataset.day), idx = Number(cb.dataset.idx);
+      state.days[id].checked[idx] = cb.checked;
+      persist(); render();
+      return;
+    }
+    const hoursInput = e.target.closest('[data-role="hours"]');
+    if (hoursInput) {
+      const id = Number(hoursInput.dataset.day);
+      let v = parseFloat(hoursInput.value);
+      if (isNaN(v) || v < 0) v = 0;
+      state.days[id].hours = v;
+      persist(); render();
+    }
+  });
+
+  boardEl.addEventListener('input', (e) => {
+    const notes = e.target.closest('[data-role="notes"]');
+    if (notes) {
+      const id = Number(notes.dataset.day);
+      state.days[id].notes = notes.value;
+      clearTimeout(notesTimer);
+      notesTimer = setTimeout(persist, 500);
+    }
+  });
+
+  heatmapEl.addEventListener('click', (e) => {
+    const cell = e.target.closest('[data-role="heat"]');
+    if (!cell) return;
+    const id = Number(cell.dataset.day);
+    expanded.add(id);
+    render();
+    requestAnimationFrame(() => {
+      const card = document.querySelector(`.card[data-day="${id}"]`);
+      if (card) card.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!resetArmed) {
+      resetArmed = true;
+      resetBtn.textContent = 'Click again to confirm';
+      resetBtn.classList.add('armed');
+      resetTimer = setTimeout(() => {
+        resetArmed = false;
+        resetBtn.textContent = 'Reset all progress';
+        resetBtn.classList.remove('armed');
+      }, 4000);
+    } else {
+      clearTimeout(resetTimer);
+      resetArmed = false;
+      resetBtn.textContent = 'Reset all progress';
+      resetBtn.classList.remove('armed');
+      state = defaultState();
+      expanded = new Set();
+      persist();
+      render();
+    }
+  });
+
+  async function init(){
+    board.todo.innerHTML = board.progress.innerHTML = board.done.innerHTML = `<p class="empty">Loading…</p>`;
+    state = await loadState();
+    const firstActive = DAYS.find(d => statusFor(d) === 'progress') || DAYS.find(d => statusFor(d) === 'todo');
+    if (firstActive) expanded.add(firstActive.id);
+    render();
+    updateFooterNote();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
