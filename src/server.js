@@ -1,18 +1,21 @@
-const express = require("express");
+import "dotenv/config";
+import pool from "./config/db.js";
+import app from "./app.js";
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+async function startServer() {
+    try {
+        const connection = await pool.getConnection();
+        console.log("Mysql Connected");
+        connection.release();
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        })
+    } catch (error) {
+        console.log(error);
+        process.exit(1);
+    }
+}
 
-app.get("/health", (req, res) => {
-    res.status(200).json({
-        status: "OK",
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString()
-    });
-});
-
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-})
+startServer();

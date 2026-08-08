@@ -14,13 +14,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/anuragrana1997/DevWorkFlow/issues"
   },
   "homepage": "https://github.com/anuragrana1997/DevWorkFlow#readme",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "mysql2": "^3.23.2",
     "nodemon": "^3.1.14"
   }
 }
