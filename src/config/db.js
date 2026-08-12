@@ -10,7 +10,8 @@ const pool = mysql.createPool({
 
     waitForConnections: true,
     connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
-    queueLimit: 0
+    queueLimit: 0,
+    multipleStatements: true
 });
-console.log(process.env.DB_USER)
+
 export default pool;
