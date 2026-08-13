@@ -32,10 +32,12 @@ CREATE TABLE tasks (
 CREATE TABLE comments (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    task_id INT,
     comment_description TEXT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (task_id) REFERENCES tasks(task_id)
 );
 
 CREATE TABLE activity_log (

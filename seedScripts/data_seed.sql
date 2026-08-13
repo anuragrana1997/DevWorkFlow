@@ -38,17 +38,17 @@ VALUES
 (4, 5, 'Migrate user endpoints', 'Replace legacy user APIs with the new service.', 2);
 
 -- COMMENTS
-INSERT INTO comments (user_id, comment_description) VALUES
-(1, 'Initial database schema has been created.'),
-(2, 'MySQL connection pool is configured and tested.'),
-(3, 'Project API implementation is in progress.'),
-(4, 'Task validation needs to be added before merging.'),
-(5, 'Authentication middleware design is ready for review.'),
-(6, 'Dashboard wireframe has been completed.'),
-(7, 'Filtering requirements have been documented.'),
-(8, 'Metrics should include pending, active, and completed tasks.'),
-(1, 'Please keep API responses consistent across endpoints.'),
-(3, 'Reporting query draft is ready for testing.');
+INSERT INTO comments (user_id, task_id, comment_description) VALUES
+(1, 1, 'Initial database schema has been created.'),
+(2, 2, 'MySQL connection pool is configured and tested.'),
+(3, 3, 'Project API implementation is in progress.'),
+(4, 4, 'Task validation needs to be added before merging.'),
+(5, 5, 'Authentication middleware design is ready for review.'),
+(6, 6, 'Dashboard wireframe has been completed.'),
+(7, 7, 'Filtering requirements have been documented.'),
+(8, 8, 'Metrics should include pending, active, and completed tasks.'),
+(1, 3, 'Please keep API responses consistent across endpoints.'),
+(3, 10, 'Reporting query draft is ready for testing.');
 
 -- ACTIVITY LOG
 -- hours_logged is kept as whole numbers because the current column is DECIMAL without a scale.
