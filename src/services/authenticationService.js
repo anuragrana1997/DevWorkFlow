@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
-import User from "../models/User.js"
+import User from "../models/User.js";
+import { createJwT } from "../middleware/authenticateMiddleware.js";
 
 export const registerUser = async (data) => {
     const { first_name, last_name, email, password } = data;
@@ -32,3 +33,21 @@ export const registerUser = async (data) => {
     }
 };
 
+export const loginUser = async (data) => {
+    const { email, password } = data;
+    const userData = await User.findOne({
+        where: { email }
+    });
+    if(!userData) {
+        throw new Error("User Doesn't Exist");
+    }
+    const isPasswordMatches = await bcrypt.compare(
+        password,
+        userData.hashed_password
+    );
+    if(!isPasswordMatches) {
+        throw new Error("Password Incorrect");
+    }
+    const jwtToken = await createJwT(userData);
+    return jwtToken;
+}

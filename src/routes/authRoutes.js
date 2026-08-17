@@ -1,9 +1,11 @@
 import express  from "express";
-import { register } from "../controllers/authenticateController.js";
+import { login, register } from "../controllers/authenticateController.js";
+import { verifyJwt } from "../middleware/authenticateMiddleware.js";
 
 const router = express.Router();
 
-console.log("here");
 router.post("/register", register);
+router.post("/login", login);
+router.get("/verifyJwt", verifyJwt)
 
 export default router;
