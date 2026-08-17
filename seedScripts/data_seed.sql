@@ -1,15 +1,21 @@
 USE devworkflow;
 
 -- USERS
-INSERT INTO users (first_name, last_name, privilege) VALUES
-('Rick', 'Nomad', 1),
-('Grey', 'Williams', 2),
-('Nish', 'Vaid', 2),
-('Arvin', 'Sinh', 2),
-('Vishal', 'Sharma', 2),
-('Emily', 'Carter', 2),
-('Daniel', 'Lee', 2),
-('Sophia', 'Martinez', 2);
+INSERT INTO users (
+    first_name,
+    last_name,
+    email,
+    hashed_password,
+    privilege
+) VALUES
+('Rick', 'Nomad', 'rick@example.com', '$2b$10$examplehash1', 1),
+('Grey', 'Williams', 'grey@example.com', '$2b$10$examplehash2', 2),
+('Nish', 'Vaid', 'nish@example.com', '$2b$10$examplehash3', 2),
+('Arvin', 'Sinh', 'arvin@example.com', '$2b$10$examplehash4', 2),
+('Vishal', 'Sharma', 'vishal@example.com', '$2b$10$examplehash5', 2),
+('Emily', 'Carter', 'emily@example.com', '$2b$10$examplehash6', 2),
+('Daniel', 'Lee', 'daniel@example.com', '$2b$10$examplehash7', 2),
+('Sophia', 'Martinez', 'sophia@example.com', '$2b$10$examplehash8', 2);
 
 -- PROJECTS
 -- project_status: 0 = pending, 1 = active, 2 = completed
