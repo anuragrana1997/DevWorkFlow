@@ -17,9 +17,17 @@ const User = dbSequelize.define(
             type: DataTypes.STRING,
             allowNull: false
         },
-        priviledge: {
-            type: DataTypes.INTEGER,
+        email: {
+            type: DataTypes.STRING,
             allowNull: false
+        },
+        hashed_password: {
+            type: DataTypes.TEXT,
+            allowNull: false
+        },
+        privilege: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         }
     },
     {

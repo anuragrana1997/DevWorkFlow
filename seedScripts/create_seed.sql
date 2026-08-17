@@ -2,7 +2,9 @@ CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
-    privilege INT NOT NULL, -- 1 for admin, 2 for member
+    email VARCHAR(255) NOT NULL,
+    hashed_password TEXT NOT NULL,
+    privilege INT DEFAULT 2, -- 1 for admin, 2 for member
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
