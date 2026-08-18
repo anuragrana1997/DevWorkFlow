@@ -13,7 +13,7 @@ export const createJwT = async (userData) => {
     );
 }
 
-export const verifyJwt = (req, res/*, next*/) => {
+export const verifyJwt = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if(!authHeader) {
@@ -27,11 +27,11 @@ export const verifyJwt = (req, res/*, next*/) => {
         const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
         req.user = decodedData;  
-        return res.status(201).json({
-            message: "Token Verfied!",
-            decodedData
-        });
-        // next();
+        // return res.status(201).json({
+        //     message: "Token Verfied!",
+        //     decodedData
+        // });
+        next();
     } catch (error) {
         return res.status(401).json({
             message: "Invalid or expired Token"

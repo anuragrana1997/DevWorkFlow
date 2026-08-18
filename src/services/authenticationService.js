@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { createJwT } from "../middleware/authenticateMiddleware.js";
 
-export const registerUser = async (data) => {
+export const registerUserService = async (data) => {
     const { first_name, last_name, email, password } = data;
 
     if(!first_name || !last_name || !email || !password ) {
@@ -33,7 +33,7 @@ export const registerUser = async (data) => {
     }
 };
 
-export const loginUser = async (data) => {
+export const loginUserService = async (data) => {
     const { email, password } = data;
     const userData = await User.findOne({
         where: { email }

@@ -4,7 +4,7 @@ CREATE TABLE users (
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     hashed_password TEXT NOT NULL,
-    privilege INT DEFAULT 2, -- 1 for admin, 2 for member
+    privilege INT DEFAULT 2, -- 1 for admin, 2 for member, 3 for viewer
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
