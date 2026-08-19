@@ -28,6 +28,10 @@ const User = dbSequelize.define(
         privilege: {
             type: DataTypes.INTEGER,
             allowNull: true
+        },
+        is_active: {
+            type: DataTypes.INTEGER,
+            allowNull: true
         }
     },
     {
