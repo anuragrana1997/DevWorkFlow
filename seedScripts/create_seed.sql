@@ -19,6 +19,16 @@ CREATE TABLE projects (
     CHECK (project_status IN (0, 1, 2))
 );
 
+CREATE TABLE projectMembers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT,
+    user_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(project_id) REFERENCES projects(project_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
+
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT,
