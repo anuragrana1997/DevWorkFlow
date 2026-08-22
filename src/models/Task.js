@@ -26,6 +26,10 @@ const Task = dbSequelize.define(
         task_status: {
             type: DataTypes.TINYINT,
             defaultValue: 0
+        },
+        task_priority: {
+            type: DataTypes.TINYINT,
+            defaultValue: 0
         }
     },
     {
