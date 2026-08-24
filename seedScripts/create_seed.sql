@@ -31,8 +31,8 @@ CREATE TABLE projectMembers (
 
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    project_id INT,
-    assignee_id INT,
+    project_id INT DEFAULT NULL,
+    assignee_id INT DEFAULT NULL,
     task_heading VARCHAR(255) DEFAULT NULL,
     task_description TEXT DEFAULT NULL,
     task_status TINYINT CHECK (task_status IN (0, 1, 2)) DEFAULT 0,

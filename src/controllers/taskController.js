@@ -1,4 +1,4 @@
-import { createTaskService, updateTaskService, getTaskService } from "../services/taskService";
+import { createTaskService, updateTaskService, getTaskService, getAllTaskService } from "../services/taskService";
 
 export const createTask = async (req, res) => {
     try {
@@ -19,10 +19,13 @@ export const createTask = async (req, res) => {
 
 export const getTask = async (req, res) => {
     try {
-        req.user_id = req.user.user_id;
+        req.body.user_id = req.user.user_id;
         if(req.params && req.params.id) {
-            req.task_id = req.params.id;
+            req.body.task_id = req.params.id;
         }
+        req.body.order = (req.query && req.query.order) || "ASC"; 
+        req.body.offset = (req.query && req.query.offset) || 10;
+        req.body.limit = (req.query && req.query.limit) || 10;
         const task = await getTaskService(req.body);
         if(!task) {
             throw new Error("Task for this user not found!");
@@ -40,7 +43,10 @@ export const getTask = async (req, res) => {
 
 export const getAllTask = async (req, res) => {
     try {
-        const task = await getTaskService(req.body);
+        req.query.order = (req.query && req.query.order) || "ASC";
+        req.query.offset = (req.query && req.query.offset) || 10;
+        req.query.limit = (req.query && req.query.limit) || 10;
+        const task = await getAllTaskService(req.query);
         if(!task) {
             throw new Error("No tasks Found!");
         }
