@@ -44,7 +44,7 @@ export const getTask = async (req, res) => {
 export const getAllTask = async (req, res) => {
     try {
         req.query.order = (req.query && req.query.order) || "ASC";
-        req.query.offset = (req.query && req.query.offset) || 10;
+        req.query.offset = (req.query && req.query.offset) || 0;
         req.query.limit = (req.query && req.query.limit) || 10;
         const task = await getAllTaskService(req.query);
         if(!task) {
