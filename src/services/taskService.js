@@ -32,6 +32,7 @@ export const getAllTaskService = async (data) => {
         where.priority = data.priority;
     }
     return await Task.findAll({
+        where,
         order: [[ "task_id", data.order ]],
         offset: data.offset,
         limit: data.limit

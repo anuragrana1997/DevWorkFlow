@@ -2,6 +2,8 @@ import express from "express";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import projectRouter from "./routes/projectRoutes.js";
+import taskRouter from "./routes/taskRoutes.js";
+import commentRouter from "./routes/commentRoutes.js";
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.get("/health", (req, res) => {
 // auth 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/project", projectRouter)
+app.use("/api/project", projectRouter);
+app.use("/api/task", taskRouter);
+app.use("/api/comment", commentRouter);
 
 export default app;

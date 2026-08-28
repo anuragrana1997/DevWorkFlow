@@ -12,3 +12,5 @@ taskRouter.get("/getTasks/:id", verifyJwt, getTask);
 taskRouter.post("/createTask", verifyJwt, createTask);
 
 taskRouter.patch("/updateTask", verifyJwt, updateTask);
+
+export default taskRouter;
