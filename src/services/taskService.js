@@ -6,6 +6,9 @@ export const createTaskService = async (data) => {
 
 export const getTaskService = async (data) => {
     const where = { assignee_id: data.user_id };
+    if(data.task_id) {
+        where.task_id = data.task_id;
+    }
     if(data.status) {
         where.status = data.status;
     }
@@ -21,10 +24,7 @@ export const getTaskService = async (data) => {
 };
 
 export const getAllTaskService = async (data) => {
-    const where = {};
-    if(data.user_id) {
-        where.assignee_id = data.user_id;
-    }
+    const where = {assignee_id: data.user_id};
     if(data.status) {
         where.status = data.status;
     }
@@ -32,6 +32,7 @@ export const getAllTaskService = async (data) => {
         where.priority = data.priority;
     }
     return await Task.findAll({
+        where,
         order: [[ "task_id", data.order ]],
         offset: data.offset,
         limit: data.limit
@@ -42,7 +43,10 @@ export const updateTaskService = async (data) => {
     return await Task.update(
         data,
         {
-            where: { assignee_id: data.user_id}
+            where: {
+                task_id: data.task_id, 
+                assignee_id: data.user_id
+            }
         }
     )
 };

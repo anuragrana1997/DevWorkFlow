@@ -5,10 +5,11 @@ import { createTask, getAllTask, getTask, updateTask } from "../controllers/task
 
 const taskRouter = express.Router();
 
-taskRouter.get("/getAllTasks", verifyJwt, checkPrivilege, getAllTask);
-taskRouter.get("/getTasks", verifyJwt, getTask);
-taskRouter.get("/getTasks/:id", verifyJwt, getTask);
+taskRouter.get("/getAllTasks", verifyJwt, getAllTask);
+taskRouter.get("/getTask/:id", verifyJwt, getTask);
 
 taskRouter.post("/createTask", verifyJwt, createTask);
 
 taskRouter.patch("/updateTask", verifyJwt, updateTask);
+
+export default taskRouter;

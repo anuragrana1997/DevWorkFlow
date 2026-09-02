@@ -1,0 +1,5 @@
+1.) getUserDetails Api to get self details for profile
+2.) create Project, update Project, delete Project is missing
+3.) add user_id to req.body in verify jwt and alter every controller if possible
+4.) test task properly
+5.) delete comment functionality
