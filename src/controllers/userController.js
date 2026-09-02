@@ -1,4 +1,5 @@
 import { deleteUserService, getUserDetailsService, updateUserService } from "../services/userService.js";
+import { checkRequiredFields } from "../common/requiredFields.js";
 
 export const getUserDetails = async(req, res) => {
     try {
@@ -10,7 +11,7 @@ export const getUserDetails = async(req, res) => {
             userDetails
         });
     } catch (error) {
-        return res.status(401).json({
+        return res.status(error.statusCode || 401).json({
             message: error.message
         });
     }
@@ -18,9 +19,7 @@ export const getUserDetails = async(req, res) => {
 
 export const updateUserDetails = async(req, res) => {
     try {
-        if(!req.body.user_id) {
-            throw new Error("user_id required to update user");
-        }
+        checkRequiredFields("updateUser", req.body);
         const [updatedRows] = await updateUserService(req.body);
         if(updatedRows === 0) {
             throw new Error("User not found");
@@ -30,7 +29,7 @@ export const updateUserDetails = async(req, res) => {
             numberOfUpdates: updatedRows
         });
     } catch (error) {
-        return res.status(401).json({
+        return res.status(error.statusCode || 401).json({
             message: error.message
         });
     }
@@ -38,9 +37,7 @@ export const updateUserDetails = async(req, res) => {
 
 export const deleteUser = async(req, res) => {
     try {
-        if(!req.body || !req.body.user_id) {
-            throw new Error("user_id is required!");
-        }
+        checkRequiredFields("deleteUser", req.body);
         const [updatedRows] = await deleteUserService(req.body);
         if(updatedRows === 0) {
             throw new Error("Failed to delete user or user doesn't exist");
@@ -49,7 +46,7 @@ export const deleteUser = async(req, res) => {
             message: "User removed from system"
         });
     } catch (error) {
-        return res.status(401).json({
+        return res.status(error.statusCode || 401).json({
             message: error.message
         });
     }

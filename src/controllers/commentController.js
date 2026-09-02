@@ -1,14 +1,16 @@
+import { checkRequiredFields } from "../common/requiredFields";
 import { createCommentService, getCommentService, updateCommentService } from "../services/commentService"; 
 
 export const createComment = async (req, res) => {
     try {
-        const comment = await createComment(req.body);
+        checkRequiredFields("createComment", req.body);
+        const comment = await createCommentService(req.body);
         return res.status(201).json({
             message: "Comment Successful!",
             comment
         });
     } catch (error) {
-        return res.status(401).json({
+        return res.status(error.statusCode || 401).json({
             message: error.message
         });
     }
@@ -16,21 +18,14 @@ export const createComment = async (req, res) => {
 
 export const updateComment = async (req, res) => {
     try {
-        if(req.body) {
-            if(!req.body.user_id) {
-                throw new Error("user_id is required!");
-            }
-            if(!req.body.comment_id) {
-                throw new Error("comment_id is required");
-            }
-        }
+        checkRequiredFields("updateComment", req.body);
         const [updatedRows] = await updateCommentService(req.body);
         if(updatedRows) {
             return res.status(201).json({
                 message: "update success"
             });
         } else {
-            return res.status(401).json({
+            return res.status(error.statusCode || 401).json({
                 message: "update failed"
             });
         }

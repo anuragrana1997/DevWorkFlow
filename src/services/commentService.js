@@ -17,15 +17,8 @@ export const updateCommentService = async (data) => {
 }
 
 export const getCommentService = async (data) => {
-    const where = {};
-    if(data.user_id) {
-        where.user_id = data.user_id;
-    }
-    if(data.task_id) {
-        where.task_id = data.task_id;
-    }
     return await Comment.findAll({
-        where
+        where: {task_id: data.task_id}
     });
 };
 

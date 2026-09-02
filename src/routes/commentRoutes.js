@@ -4,7 +4,7 @@ import { createComment, getComment, updateComment } from "../controllers/comment
 
 const commentRouter = express.Router();
 
-commentRouter.get("/getComments/:user_id/:task_id", verifyJwt, getComment);
+commentRouter.get("/getComments/:task_id", verifyJwt, getComment);
 commentRouter.patch("/updateComment", verifyJwt, updateComment);
 commentRouter.put("/createComment", verifyJwt, createComment)
 
