@@ -23,5 +23,5 @@ export const getCommentService = async (data) => {
 };
 
 export const deleteCommentService = async (data) => {
-    // will fill if needed
+    return await Comment.destroy({ where: {comment_id: data.comment_id }});
 };

@@ -1,5 +1,5 @@
-import { createTaskService, updateTaskService, getTaskService, getAllTaskService } from "../services/taskService";
-import { checkRequiredFields } from "../common/requiredFields";
+import { createTaskService, updateTaskService, getTaskService, getAllTaskService } from "../services/taskService.js";
+import { checkRequiredFields } from "../common/requiredFields.js";
 
 export const createTask = async (req, res) => {
     try {

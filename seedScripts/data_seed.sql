@@ -15,7 +15,8 @@ INSERT INTO users (
 ('Vishal', 'Sharma', 'vishal@example.com', '$2b$10$examplehash5', 2),
 ('Emily', 'Carter', 'emily@example.com', '$2b$10$examplehash6', 2),
 ('Daniel', 'Lee', 'daniel@example.com', '$2b$10$examplehash7', 2),
-('Sophia', 'Martinez', 'sophia@example.com', '$2b$10$examplehash8', 2);
+('Sophia', 'Martinez', 'sophia@example.com', '$2b$10$examplehash8', 2),
+('Admin', 'Goat', 'gg@gmail.com', '$2b$10$PNmdboRQlVWDKF.Wk8Yyqu4l0o4H49lD4KZ4/7xc9E.IY/P9/MfRS', 1);
 
 -- PROJECTS
 -- project_status: 0 = pending, 1 = active, 2 = completed
