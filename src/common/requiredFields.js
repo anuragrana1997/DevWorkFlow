@@ -6,6 +6,9 @@ const requiredFields = {
     "updateTask": ["task_id"],
     "createComment": ["comment_description"],
     "updateComment": ["user_id", "comment_id", "comment_description"],
+    "createProject": ["project_name"],
+    "changeProjectStatus": ["project_id", "project_status"],
+    "deleteComment": ["comment_id"]
 }
 
 const requiredFieldsDT = {
@@ -13,8 +16,11 @@ const requiredFieldsDT = {
     "project_id": "number",
     "task_id": "number",
     "comment_id": "number",
+    "project_id": "number",
+    "project_status": "number",
     "task_heading": "string",
-    "comment_description": "string"
+    "comment_description": "string",
+    "project_name": "string"
 }
 
 export const checkRequiredFields = (apiName, data) => {

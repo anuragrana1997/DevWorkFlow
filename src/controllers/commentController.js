@@ -1,5 +1,5 @@
-import { checkRequiredFields } from "../common/requiredFields";
-import { createCommentService, getCommentService, updateCommentService } from "../services/commentService"; 
+import { checkRequiredFields } from "../common/requiredFields.js";
+import { createCommentService, getCommentService, updateCommentService } from "../services/commentService.js"; 
 
 export const createComment = async (req, res) => {
     try {
@@ -25,12 +25,12 @@ export const updateComment = async (req, res) => {
                 message: "update success"
             });
         } else {
-            return res.status(error.statusCode || 401).json({
+            return res.status(401).json({
                 message: "update failed"
             });
         }
     } catch (error) {
-        return res.status(401).json({
+        return res.status(error.statusCode || 401).json({
             message: error.message
         });
     }
@@ -50,4 +50,15 @@ export const getComment = async (req, res) => {
     }
 };
 
-// export const deleteComment = async (req, res) => {};
+export const deleteComment = async (req, res) => {
+    try {
+        checkRequiredFields("deleteComment", req.body)
+        return res.status(201).json({
+            message: "Delete Success"
+        });
+    } catch (error) {
+        return res.status(error.statusCode || 401).json({
+            message: error.message
+        });
+    }
+};

@@ -1,7 +1,6 @@
 import express from "express";
-import { verifyJwt } from "../middleware/authenticateMiddleware";
-import { checkPrivilege } from "../middleware/userMiddleware";
-import { createTask, getAllTask, getTask, updateTask } from "../controllers/taskController";
+import { verifyJwt } from "../middleware/authenticateMiddleware.js";
+import { createTask, getAllTask, getTask, updateTask } from "../controllers/taskController.js";
 
 const taskRouter = express.Router();
 
