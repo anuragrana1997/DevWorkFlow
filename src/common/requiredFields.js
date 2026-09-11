@@ -8,7 +8,11 @@ const requiredFields = {
     "updateComment": ["user_id", "comment_id", "comment_description"],
     "createProject": ["project_name"],
     "changeProjectStatus": ["project_id", "project_status"],
-    "deleteComment": ["comment_id"]
+    "deleteComment": ["comment_id"],
+    "createActivityLog": ["log_id", "user_id", "task_id"],
+    "updateActiviyLog": ["log_id", "user_id"],
+    "getActivityLog": ["task_id"],
+    "deleteActivityLog": ["log_id"]
 }
 
 const requiredFieldsDT = {
@@ -17,6 +21,7 @@ const requiredFieldsDT = {
     "task_id": "number",
     "comment_id": "number",
     "project_id": "number",
+    "log_id": "number",
     "project_status": "number",
     "task_heading": "string",
     "comment_description": "string",
