@@ -4,6 +4,7 @@ import userRoutes from "./routes/userRoutes.js";
 import projectRouter from "./routes/projectRoutes.js";
 import taskRouter from "./routes/taskRoutes.js";
 import commentRouter from "./routes/commentRoutes.js";
+import activityLogRouter from "./routes/activityLogRoutes.js";
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use("/api/user", userRoutes);
 app.use("/api/project", projectRouter);
 app.use("/api/task", taskRouter);
 app.use("/api/comment", commentRouter);
+app.use("/api/activitLog", activityLogRouter);
 
 export default app;

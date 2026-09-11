@@ -1,3 +1,4 @@
 1.) add user_id to req.body in verify jwt and alter every controller if possible
 2.) test task properly
 3.) move member to different project functionality
+4.) throw error when db operation fails, for each controller
