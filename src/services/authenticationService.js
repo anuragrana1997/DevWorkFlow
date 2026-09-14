@@ -5,10 +5,6 @@ import { createJwT } from "../middleware/authenticateMiddleware.js";
 export const registerUserService = async (data) => {
     const { first_name, last_name, email, password } = data;
 
-    if(!first_name || !last_name || !email || !password ) {
-        throw new Error("All fields are required");
-    }
-
     const existingUser = await User.findOne({
         where: { email }
     });
