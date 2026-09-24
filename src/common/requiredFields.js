@@ -1,4 +1,6 @@
 const requiredFields = {
+    "register": ["email", "password", "first_name", "last_name"],
+    "login": ["email", "password"],
     "updateUser": ["user_id"],
     "deleteUser": ["user_id"],
     "addMemberToProject": ["user_id", "project_id"],
@@ -23,13 +25,17 @@ const requiredFieldsDT = {
     "project_id": "number",
     "log_id": "number",
     "project_status": "number",
+    "email": "string",
+    "password": "string",
+    "first_name": "string",
+    "last_name": "string",
     "task_heading": "string",
     "comment_description": "string",
     "project_name": "string"
 }
 
 export const checkRequiredFields = (apiName, data) => {
-    mandateFields = requiredFields[apiName]
+    const mandateFields = requiredFields[apiName]
     for(const field of mandateFields) {
         if(!Object.hasOwn(data, field)) {
             const error = new Error(`${field} is required`)

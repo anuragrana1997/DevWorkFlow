@@ -1,15 +1,15 @@
-import { checkRequiredFields } from "../common/requiredFields";
+import { checkRequiredFields } from "../common/requiredFields.js";
 import { 
     createActivityLogService, 
     updateActivityLogService, 
     getActivityLogService, 
     deleteActivityLogService  
-} from "../services/activityLogService";
+} from "../services/activityLogService.js";
 
 export const createActivityLog = async( req, res ) => {
     try {
         checkRequiredFields("createActivityLog", req.body);
-        const log = await createActivityLog(req.body);
+        const log = await createActivityLogService(req.body);
         if(log) {
             return res.status(201).json({
                 message: "Log Created!",
@@ -65,6 +65,7 @@ export const getActivityLog = async ( req, res) => {
 export const deleteActivityLog = async ( req, res ) => {
     try {
         checkRequiredFields("deleteActivityLog", req.body);
+        const result = deleteActivityLogService(req.body);
         return res.status(201).json({
             message: "Delete Success"
         });
