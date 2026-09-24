@@ -35,7 +35,7 @@ const requiredFieldsDT = {
 }
 
 export const checkRequiredFields = (apiName, data) => {
-    mandateFields = requiredFields[apiName]
+    const mandateFields = requiredFields[apiName]
     for(const field of mandateFields) {
         if(!Object.hasOwn(data, field)) {
             const error = new Error(`${field} is required`)
