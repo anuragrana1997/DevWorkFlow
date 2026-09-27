@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { checkPrivilege } from "./userMiddleware.js";
+import { checkPrivilege } from "../../src/middleware/userMiddleware.js";
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),

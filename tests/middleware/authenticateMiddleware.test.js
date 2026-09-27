@@ -7,7 +7,7 @@ jest.unstable_mockModule("jsonwebtoken", () => ({
     default: { sign, verify }
 }));
 
-const { createJwT, verifyJwt } = await import("./authenticateMiddleware.js");
+const { createJwT, verifyJwt } = await import("../../src/middleware/authenticateMiddleware.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),

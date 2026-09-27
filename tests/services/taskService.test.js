@@ -4,11 +4,11 @@ const create = jest.fn();
 const findAll = jest.fn();
 const update = jest.fn();
 
-jest.unstable_mockModule("../models/Task.js", () => ({
+jest.unstable_mockModule("../../src/models/Task.js", () => ({
     default: { create, findAll, update }
 }));
 
-const { createTaskService, getTaskService, getAllTaskService, updateTaskService } = await import("./taskService.js");
+const { createTaskService, getTaskService, getAllTaskService, updateTaskService } = await import("../../src/services/taskService.js");
 
 describe("taskService", () => {
     beforeEach(() => jest.clearAllMocks());

@@ -5,15 +5,15 @@ const getCommentService = jest.fn();
 const updateCommentService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/commentService.js", () => ({
+jest.unstable_mockModule("../../src/services/commentService.js", () => ({
     createCommentService,
     getCommentService,
     updateCommentService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({ checkRequiredFields }));
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { createComment, updateComment, getComment, deleteComment } = await import("./commentController.js");
+const { createComment, updateComment, getComment, deleteComment } = await import("../../src/controllers/commentController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),
