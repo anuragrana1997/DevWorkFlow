@@ -10,15 +10,15 @@ jest.unstable_mockModule("bcrypt", () => ({
     default: { hash, compare }
 }));
 
-jest.unstable_mockModule("../models/User.js", () => ({
+jest.unstable_mockModule("../../src/models/User.js", () => ({
     default: { findOne, create }
 }));
 
-jest.unstable_mockModule("../middleware/authenticateMiddleware.js", () => ({
+jest.unstable_mockModule("../../src/middleware/authenticateMiddleware.js", () => ({
     createJwT
 }));
 
-const { registerUserService, loginUserService } = await import("./authenticationService.js");
+const { registerUserService, loginUserService } = await import("../../src/services/authenticationService.js");
 
 describe("authenticationService", () => {
     beforeEach(() => jest.clearAllMocks());

@@ -6,16 +6,16 @@ const getActivityLogService = jest.fn();
 const deleteActivityLogService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/activityLogService.js", () => ({
+jest.unstable_mockModule("../../src/services/activityLogService.js", () => ({
     createActivityLogService,
     updateActivityLogService,
     getActivityLogService,
     deleteActivityLogService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({ checkRequiredFields }));
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { createActivityLog, updateActivityLog, getActivityLog, deleteActivityLog } = await import("./activityLogController.js");
+const { createActivityLog, updateActivityLog, getActivityLog, deleteActivityLog } = await import("../../src/controllers/activityLogController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),

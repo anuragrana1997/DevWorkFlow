@@ -5,15 +5,15 @@ const getUserDetailsService = jest.fn();
 const updateUserService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/userService.js", () => ({
+jest.unstable_mockModule("../../src/services/userService.js", () => ({
     deleteUserService,
     getUserDetailsService,
     updateUserService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({ checkRequiredFields }));
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { getUserDetails, updateUserDetails, deleteUser } = await import("./userController.js");
+const { getUserDetails, updateUserDetails, deleteUser } = await import("../../src/controllers/userController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),

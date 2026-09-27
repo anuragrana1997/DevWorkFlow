@@ -8,11 +8,11 @@ jest.unstable_mockModule("bcrypt", () => ({
     default: { hash }
 }));
 
-jest.unstable_mockModule("../models/User.js", () => ({
+jest.unstable_mockModule("../../src/models/User.js", () => ({
     default: { findOne, update }
 }));
 
-const { getUserDetailsService, updateUserService, deleteUserService } = await import("./userService.js");
+const { getUserDetailsService, updateUserService, deleteUserService } = await import("../../src/services/userService.js");
 
 describe("userService", () => {
     beforeEach(() => jest.clearAllMocks());

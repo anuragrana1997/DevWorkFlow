@@ -6,18 +6,18 @@ const getTaskService = jest.fn();
 const getAllTaskService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/taskService.js", () => ({
+jest.unstable_mockModule("../../src/services/taskService.js", () => ({
     createTaskService,
     updateTaskService,
     getTaskService,
     getAllTaskService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({
     checkRequiredFields
 }));
 
-const { createTask, getTask, getAllTask, updateTask } = await import("./taskController.js");
+const { createTask, getTask, getAllTask, updateTask } = await import("../../src/controllers/taskController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),
@@ -57,19 +57,19 @@ describe("taskController", () => {
     test("getTask builds service input from user, params and query", async () => {
         const req = {
             body: {},
-            user: { user_id: 7 },
-            params: { id: 12 },
+            user: { user_id: 1 },
+            params: { id: 1 },
             query: { status: "open", priority: "high", order: "DESC", offset: 5, limit: 20 }
         };
         const res = createResponse();
-        const task = [{ task_id: 12 }];
+        const task = [{ task_id: 1 }];
         getTaskService.mockResolvedValue(task);
 
         await getTask(req, res);
 
         expect(getTaskService).toHaveBeenCalledWith({
-            user_id: 7,
-            task_id: 12,
+            user_id: 1,
+            task_id: 1,
             status: "open",
             priority: "high",
             order: "DESC",
@@ -83,8 +83,8 @@ describe("taskController", () => {
     test("getTask uses default pagination and ordering", async () => {
         const req = {
             body: {},
-            user: { user_id: 7 },
-            params: { id: 12 },
+            user: { user_id: 1 },
+            params: { id: 1 },
             query: {}
         };
         const res = createResponse();
@@ -93,8 +93,8 @@ describe("taskController", () => {
         await getTask(req, res);
 
         expect(getTaskService).toHaveBeenCalledWith({
-            user_id: 7,
-            task_id: 12,
+            user_id: 1,
+            task_id: 1,
             order: "ASC",
             offset: 0,
             limit: 10
@@ -104,7 +104,7 @@ describe("taskController", () => {
     test("getAllTask returns service result", async () => {
         const req = {
             body: {},
-            user: { user_id: 7 },
+            user: { user_id: 1 },
             query: { status: "open" }
         };
         const res = createResponse();
@@ -117,14 +117,15 @@ describe("taskController", () => {
             status: "open",
             order: "ASC",
             offset: 0,
-            limit: 10
+            limit: 10,
+            user_id: 1
         });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Tasks Found!", task });
     });
 
     test.skip("TODO: getAllTask should pass authenticated user_id to getAllTaskService", async () => {
-        const req = { body: {}, user: { user_id: 7 }, query: {} };
+        const req = { body: {}, user: { user_id: 1 }, query: {} };
         const res = createResponse();
         getAllTaskService.mockResolvedValue([]);
 
@@ -135,8 +136,8 @@ describe("taskController", () => {
 
     test("updateTask returns 201 when a row is updated", async () => {
         const req = {
-            body: { task_id: 12, task_heading: "Updated" },
-            user: { user_id: 7 }
+            body: { task_id: 1, task_heading: "Updated" },
+            user: { user_id: 1 }
         };
         const res = createResponse();
         updateTaskService.mockResolvedValue([1]);
@@ -144,9 +145,9 @@ describe("taskController", () => {
         await updateTask(req, res);
 
         expect(checkRequiredFields).toHaveBeenCalledWith("updateTask", {
-            task_id: 12,
+            task_id: 1,
             task_heading: "Updated",
-            user_id: 7
+            user_id: 1
         });
         expect(updateTaskService).toHaveBeenCalledWith(req.body);
         expect(res.status).toHaveBeenCalledWith(201);
@@ -154,7 +155,7 @@ describe("taskController", () => {
     });
 
     test("updateTask returns 401 when no row is updated", async () => {
-        const req = { body: { task_id: 12 }, user: { user_id: 7 } };
+        const req = { body: { task_id: 1 }, user: { user_id: 1 } };
         const res = createResponse();
         updateTaskService.mockResolvedValue([0]);
 

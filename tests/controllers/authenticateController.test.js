@@ -4,16 +4,16 @@ const loginUserService = jest.fn();
 const registerUserService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/authenticationService.js", () => ({
+jest.unstable_mockModule("../../src/services/authenticationService.js", () => ({
     loginUserService,
     registerUserService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({
     checkRequiredFields
 }));
 
-const { register, login } = await import("./authenticateController.js");
+const { register, login } = await import("../../src/controllers/authenticateController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),

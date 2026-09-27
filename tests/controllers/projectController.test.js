@@ -5,15 +5,15 @@ const changeProjectStatusService = jest.fn();
 const createProjectService = jest.fn();
 const checkRequiredFields = jest.fn();
 
-jest.unstable_mockModule("../services/projectService.js", () => ({
+jest.unstable_mockModule("../../src/services/projectService.js", () => ({
     addMemberToProjectService,
     changeProjectStatusService,
     createProjectService
 }));
 
-jest.unstable_mockModule("../common/requiredFields.js", () => ({ checkRequiredFields }));
+jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { addMemberToProject, createProject, changeProjectStatus } = await import("./projectController.js");
+const { addMemberToProject, createProject, changeProjectStatus } = await import("../../src/controllers/projectController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),
