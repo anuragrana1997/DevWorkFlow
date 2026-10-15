@@ -1,7 +1,10 @@
 import { useState } from "react";
 import '../styles/Register.css';
+import { useNavigate } from "react-router-dom";
 
 export const Register = () => {
+
+    const navigate = useNavigate() 
 
     // states
     const [formData, setFormData] = useState({
@@ -23,7 +26,11 @@ export const Register = () => {
         }
         setFormData(updatedFormData)
 
-        validate(updatedFormData)
+        if(updatedFormData && updatedFormData.confirm_password.length > 0) {
+            validate(updatedFormData)
+        } else {
+            setError("")
+        }
     }
 
     const validate = (updatedFormData) => {
@@ -34,9 +41,14 @@ export const Register = () => {
         }
     }
 
+    const handleRegister = (e) => {
+        e.preventDefault();
+        navigate("/login")
+    }
+
     return (
         <div className="register-container">
-            <form className="register-form">
+            <form className="register-form" onSubmit={handleRegister}>
                 <div className="form-group">
                     <label htmlFor="first_name">First Name:</label>
                     <input id="first_name" name="first_name" type="text" onChange={handleChange} required />
