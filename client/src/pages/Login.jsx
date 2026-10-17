@@ -1,7 +1,10 @@
 import { useState } from "react";
 import "../styles/Login.css";
+import { useAuth } from "../context/AuthContext";
 
 export const Login = () => {
+
+    const { login } = useAuth();
 
     // states
     const [formData, setFormData] = useState({
