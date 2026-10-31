@@ -1,6 +1,6 @@
 import { Comments } from "../commentComponents/Comments"
 
-export const TicketDetails = ({ ticketId }) => {
+export const TicketDetails = ({ ticketId, ticketHeading, ticketDescription }) => {
 
     return (
         <div className="ticket-details-container">
