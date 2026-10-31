@@ -1,6 +1,26 @@
 import ProjectMembers from "../models/ProjectMembers.js";
 import Project from "../models/Project.js";
 
+export const getProjectService = async(data) => {
+    const { user_id } = data;
+    return await Project.findAll({
+        include: [
+            {
+                model: User,
+                as: "members",
+                where: {
+                    user_id: user_id
+                },
+                attributes: [],
+                through: {
+                    attributes: []
+                },
+                required: true
+            }
+        ]
+    });
+}
+
 export const addMemberToProjectService = async(data) => {
     const {project_id, user_id} = data;
     return await ProjectMembers.create({
