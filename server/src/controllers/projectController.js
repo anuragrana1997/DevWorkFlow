@@ -1,5 +1,22 @@
-import { addMemberToProjectService, changeProjectStatusService, createProjectService } from "../services/projectService.js";
+import { addMemberToProjectService, changeProjectStatusService, createProjectService, getProjectService } from "../services/projectService.js";
 import { checkRequiredFields } from "../common/requiredFields.js";
+
+export const getProjects = async (req, res) => {
+    try {
+        const response = await getProjectService(req.body);
+        if(!response) {
+            throw new Error("Unable to fetch Projects for this user!")
+        }
+        return res.status(201).json({
+            message: "Fetch Success",
+            response
+        })
+    } catch (error) {
+        return res.status(error.statusCode || 401).json({
+            message: error.message
+        });
+    }
+}
 
 export const addMemberToProject = async (req, res) => {
     try {
