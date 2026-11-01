@@ -1,23 +1,23 @@
 import ProjectMembers from "../models/ProjectMembers.js";
 import Project from "../models/Project.js";
+import Task from "../models/Task.js";
+import { Op } from "sequelize";
 
 export const getProjectService = async(data) => {
     const { user_id } = data;
+    const [memberships, assignedTasks] = await Promise.all([
+        ProjectMembers.findAll({ where: { user_id }, attributes: ["project_id"] }),
+        Task.findAll({ where: { assignee_id: user_id }, attributes: ["project_id"] })
+    ]);
+    const projectIds = [...new Set(
+        [...memberships, ...assignedTasks]
+            .map((item) => item.project_id)
+            .filter((id) => id != null)
+    )];
+    if (projectIds.length === 0) return [];
     return await Project.findAll({
-        include: [
-            {
-                model: User,
-                as: "members",
-                where: {
-                    user_id: user_id
-                },
-                attributes: [],
-                through: {
-                    attributes: []
-                },
-                required: true
-            }
-        ]
+        where: { project_id: { [Op.in]: projectIds } },
+        order: [["project_id", "ASC"]]
     });
 }
 

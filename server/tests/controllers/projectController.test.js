@@ -3,17 +3,19 @@ import { jest } from "@jest/globals";
 const addMemberToProjectService = jest.fn();
 const changeProjectStatusService = jest.fn();
 const createProjectService = jest.fn();
+const getProjectService = jest.fn();
 const checkRequiredFields = jest.fn();
 
 jest.unstable_mockModule("../../src/services/projectService.js", () => ({
     addMemberToProjectService,
     changeProjectStatusService,
-    createProjectService
+    createProjectService,
+    getProjectService
 }));
 
 jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { addMemberToProject, createProject, changeProjectStatus } = await import("../../src/controllers/projectController.js");
+const { addMemberToProject, createProject, changeProjectStatus, getProjects } = await import("../../src/controllers/projectController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),
@@ -22,6 +24,18 @@ const createResponse = () => ({
 
 describe("projectController", () => {
     beforeEach(() => jest.clearAllMocks());
+
+    test("getProjects requests only the authenticated user's projects", async () => {
+        const req = { user: { user_id: 7 }, body: { user_id: 99 } };
+        const res = createResponse();
+        const response = [{ project_id: 2, project_name: "Dashboard" }];
+        getProjectService.mockResolvedValue(response);
+
+        await getProjects(req, res);
+
+        expect(getProjectService).toHaveBeenCalledWith({ user_id: 7 });
+        expect(res.json).toHaveBeenCalledWith({ message: "Fetch Success", response });
+    });
 
     test("addMemberToProject returns 201 on success", async () => {
         const req = { body: { user_id: 1, project_id: 2 } };

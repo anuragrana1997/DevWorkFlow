@@ -38,7 +38,7 @@ export const updateComment = async (req, res) => {
 
 export const getComment = async (req, res) => {
     try {
-        const comments = await getCommentService(req.query);
+        const comments = await getCommentService({ task_id: req.params.task_id });
         return res.status(201).json({
             message: "Fetch Success",
             comments

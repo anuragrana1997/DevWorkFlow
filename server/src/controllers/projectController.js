@@ -3,7 +3,7 @@ import { checkRequiredFields } from "../common/requiredFields.js";
 
 export const getProjects = async (req, res) => {
     try {
-        const response = await getProjectService(req.body);
+        const response = await getProjectService({ user_id: req.user.user_id });
         if(!response) {
             throw new Error("Unable to fetch Projects for this user!")
         }

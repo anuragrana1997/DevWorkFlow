@@ -1,7 +1,7 @@
 import Comment from "../models/Comment.js";
 
 export const createCommentService = async (data) => {
-    return await Comment.create({ data });
+    return await Comment.create(data);
 }
 
 export const updateCommentService = async (data) => {

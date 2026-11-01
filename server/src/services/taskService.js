@@ -26,17 +26,18 @@ export const getTaskService = async (data) => {
 export const getAllTaskService = async (data) => {
     const where = {assignee_id: data.user_id};
     if(data.status) {
-        where.status = data.status;
+        where.task_status = data.status;
     }
     if(data.priority) {
-        where.priority = data.priority;
+        where.task_priority = data.priority;
     }
-    return await Task.findAll({
+    const options = {
         where,
-        order: [[ "task_id", data.order ]],
-        offset: data.offset,
-        limit: data.limit
-    });
+        order: [[ "task_id", data.order ]]
+    };
+    if (data.offset !== undefined) options.offset = data.offset;
+    if (data.limit !== undefined) options.limit = data.limit;
+    return await Task.findAll(options);
 }
 
 export const updateTaskService = async (data) => {

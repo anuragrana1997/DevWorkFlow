@@ -21,6 +21,7 @@ export const createTask = async (req, res) => {
 
 export const getTask = async (req, res) => {
     try {
+        req.body.user_id = req.user.user_id;
         req.body.task_id = req.params.id;
         if(req.query && req.query.status) {
             req.body.status = req.query.status;
@@ -48,10 +49,14 @@ export const getTask = async (req, res) => {
 
 export const getAllTask = async (req, res) => {
     try {
-        req.query.order = (req.query && req.query.order) || "ASC";
-        req.query.offset = (req.query && req.query.offset) || 0;
-        req.query.limit = (req.query && req.query.limit) || 10;
-        const task = await getAllTaskService(req.query);
+        const query = {
+            ...req.query,
+            user_id: req.user.user_id,
+            order: req.query?.order || "ASC"
+        };
+        if (req.query?.offset !== undefined) query.offset = Number(req.query.offset);
+        if (req.query?.limit !== undefined) query.limit = Number(req.query.limit);
+        const task = await getAllTaskService(query);
         if(!task) {
             throw new Error("No tasks Found!");
         }
@@ -68,6 +73,7 @@ export const getAllTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
     try {
+        req.body.user_id = req.user.user_id;
         checkRequiredFields("updateTask", req.body);
         const [updatedRows] = await updateTaskService(req.body);
         if(!updatedRows) {

@@ -59,15 +59,15 @@ describe("commentController", () => {
         expect(res.json).toHaveBeenCalledWith({ message: "update failed" });
     });
 
-    test("getComment forwards query to service", async () => {
-        const req = { query: { task_id: 10 } };
+    test("getComment forwards the task route parameter to service", async () => {
+        const req = { params: { task_id: "10" } };
         const res = createResponse();
         const comments = [{ comment_id: 1 }];
         getCommentService.mockResolvedValue(comments);
 
         await getComment(req, res);
 
-        expect(getCommentService).toHaveBeenCalledWith(req.query);
+        expect(getCommentService).toHaveBeenCalledWith({ task_id: "10" });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Fetch Success", comments });
     });
