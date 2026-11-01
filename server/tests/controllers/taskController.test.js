@@ -116,12 +116,20 @@ describe("taskController", () => {
         expect(getAllTaskService).toHaveBeenCalledWith({
             status: "open",
             order: "ASC",
-            offset: 0,
-            limit: 10,
             user_id: 1
         });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Tasks Found!", task });
+    });
+
+    test("getAllTask ignores a user id supplied in the query", async () => {
+        const req = { user: { user_id: 7 }, query: { user_id: 99 } };
+        const res = createResponse();
+        getAllTaskService.mockResolvedValue([]);
+
+        await getAllTask(req, res);
+
+        expect(getAllTaskService).toHaveBeenCalledWith({ user_id: 7, order: "ASC" });
     });
 
     test.skip("TODO: getAllTask should pass authenticated user_id to getAllTaskService", async () => {

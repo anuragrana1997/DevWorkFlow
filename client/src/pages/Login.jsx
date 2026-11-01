@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/Login.css";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import { api } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
@@ -30,19 +30,15 @@ export const Login = () => {
     const handleSubmit = async(e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(
-                "http://localhost:3000/api/auth/login",
-                formData
-            )
-            if(response) {
-                console.log(response)
-                login(response)
+            const response = await api.post("/api/auth/login", formData)
+            if(response.data.jwt_token) {
+                login(response.data.jwt_token)
                 navigate("/dashboard")
             } else {
                 throw new Error("Login Failed!")
             }
         } catch (error) {
-            console.log(error.message)
+            setError(error.response?.data?.message || error.message)
         }
     }
 

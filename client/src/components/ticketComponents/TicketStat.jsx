@@ -1,12 +1,11 @@
-export const TicketStat = ({ ticketId, ticketHeading, ticketPriority }) => {
+const priorities = ["Low", "Medium", "High"];
 
-    return (
-        <div className="ticket-stat-container">
-            <h6>{ticketId}</h6>
-            <div className="ticket-stat-subcontainer">
-                <p>{ticketHeading}</p>
-                <p>{ticketPriority}</p>
-            </div>
-        </div>
-    )
-}
+export const TicketStat = ({ ticket }) => (
+    <span className="ticket-card-content">
+        <span className="card-overline">Task #{ticket.task_id}</span>
+        <span className="card-title">{ticket.task_heading}</span>
+        <span className="card-caption">
+            Priority: {priorities[ticket.task_priority] || "Unspecified"}
+        </span>
+    </span>
+);

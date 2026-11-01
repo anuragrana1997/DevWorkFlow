@@ -63,6 +63,17 @@ describe("taskService", () => {
         });
     });
 
+    test("getAllTaskService returns all assigned tasks when no limit is requested", async () => {
+        findAll.mockResolvedValue([]);
+
+        await getAllTaskService({ user_id: 7, order: "ASC" });
+
+        expect(findAll).toHaveBeenCalledWith({
+            where: { assignee_id: 7 },
+            order: [["task_id", "ASC"]]
+        });
+    });
+
     test("updateTaskService restricts update by task and assignee", async () => {
         const data = { task_id: 3, user_id: 7, task_heading: "Updated" };
         update.mockResolvedValue([1]);
