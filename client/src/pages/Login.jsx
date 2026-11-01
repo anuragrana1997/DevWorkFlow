@@ -1,8 +1,8 @@
 import { useState } from "react";
-import "../styles/Login.css";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../config/api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthLayout } from "../components/AuthLayout";
 
 export const Login = () => {
 
@@ -43,22 +43,24 @@ export const Login = () => {
     }
 
     return (
-        <div className="login-container">
-            <form className="login-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="email">Email:</label>
-                    <input type="email" id="email" name="email" onChange={handleChange} required />
+        <AuthLayout eyebrow="SIGN IN" title="Welcome back" description="Sign in to see your tasks and projects.">
+            <form className="auth-form" onSubmit={handleSubmit}>
+                <div className="auth-field">
+                    <label htmlFor="email">Email address</label>
+                    <input type="email" id="email" name="email" autoComplete="email"
+                        placeholder="you@example.com" onChange={handleChange} required />
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="password">Password:</label>
-                    <input type="password" id="password" name="password" onChange={handleChange} required />
+                <div className="auth-field">
+                    <label htmlFor="password">Password</label>
+                    <input type="password" id="password" name="password" autoComplete="current-password"
+                        placeholder="Enter your password" onChange={handleChange} required />
                 </div>
-                {error && <p>{error}</p>}
-                <div className="form-group">
-                    <button type="submit">Login</button>
-                </div>
+                {error && <p className="auth-error" role="alert">{error}</p>}
+                <button className="auth-primary-button" type="submit">Sign in</button>
             </form>
-        </div>
+            <div className="auth-divider"><span>New to DevWorkflow?</span></div>
+            <Link className="auth-secondary-button" to="/register">Create an account</Link>
+        </AuthLayout>
     )
 }
