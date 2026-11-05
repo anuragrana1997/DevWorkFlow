@@ -4,7 +4,21 @@ import { checkRequiredFields } from "../common/requiredFields.js";
 export const createTask = async (req, res) => {
     try {
         checkRequiredFields("createTask", req.body);
-        const task =  await createTaskService(req.body);
+        if (!req.body.task_heading.trim()) return res.status(400).json({ message: "Task title cannot be empty." });
+        if (req.body.task_status !== undefined && (!Number.isInteger(req.body.task_status) || req.body.task_status < 0 || req.body.task_status > 4)) {
+            return res.status(400).json({ message: "Invalid task status." });
+        }
+        if (req.body.project_id !== undefined && (!Number.isInteger(req.body.project_id) || req.body.project_id < 1)) {
+            return res.status(400).json({ message: "Invalid project." });
+        }
+        const task = await createTaskService({
+            task_heading: req.body.task_heading.trim(),
+            task_description: req.body.task_description ?? null,
+            task_priority: req.body.task_priority ?? 0,
+            task_status: req.body.task_status ?? 0,
+            project_id: req.body.project_id ?? null,
+            assignee_id: req.user.user_id
+        });
         if(!task) {
             throw new Error("Task creation failed!");
         }
@@ -75,12 +89,21 @@ export const updateTask = async (req, res) => {
     try {
         req.body.user_id = req.user.user_id;
         checkRequiredFields("updateTask", req.body);
+        if (req.body.task_heading !== undefined && (typeof req.body.task_heading !== "string" || !req.body.task_heading.trim())) {
+            return res.status(400).json({ message: "Task title cannot be empty." });
+        }
+        if (req.body.task_status !== undefined && (!Number.isInteger(req.body.task_status) || req.body.task_status < 0 || req.body.task_status > 4)) {
+            return res.status(400).json({ message: "Invalid task status." });
+        }
+        if (req.body.project_id != null && (!Number.isInteger(req.body.project_id) || req.body.project_id < 1)) {
+            return res.status(400).json({ message: "Invalid project." });
+        }
         const [updatedRows] = await updateTaskService(req.body);
         if(!updatedRows) {
             throw new Error("Task update Failed!");
         }        
         return res.status(201).json({
-            message: "Task created successfully!"
+            message: "Task updated successfully!"
         });
     } catch (error) {
         return res.status(error.statusCode || 401).json({

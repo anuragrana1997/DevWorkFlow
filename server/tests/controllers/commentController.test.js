@@ -3,12 +3,14 @@ import { jest } from "@jest/globals";
 const createCommentService = jest.fn();
 const getCommentService = jest.fn();
 const updateCommentService = jest.fn();
+const deleteCommentService = jest.fn();
 const checkRequiredFields = jest.fn();
 
 jest.unstable_mockModule("../../src/services/commentService.js", () => ({
     createCommentService,
     getCommentService,
-    updateCommentService
+    updateCommentService,
+    deleteCommentService
 }));
 
 jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
@@ -24,7 +26,7 @@ describe("commentController", () => {
     beforeEach(() => jest.clearAllMocks());
 
     test("createComment returns the created comment", async () => {
-        const req = { body: { comment_description: "Looks good" } };
+        const req = { body: { comment_description: "Looks good", task_id: 8 }, user: { user_id: 7 } };
         const res = createResponse();
         const comment = { comment_id: 1, comment_description: "Looks good" };
         createCommentService.mockResolvedValue(comment);
@@ -32,7 +34,7 @@ describe("commentController", () => {
         await createComment(req, res);
 
         expect(checkRequiredFields).toHaveBeenCalledWith("createComment", req.body);
-        expect(createCommentService).toHaveBeenCalledWith(req.body);
+        expect(createCommentService).toHaveBeenCalledWith({ comment_description: "Looks good", task_id: 8, user_id: 7 });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Comment Successful!", comment });
     });
@@ -73,13 +75,23 @@ describe("commentController", () => {
     });
 
     test("deleteComment validates request and returns success", async () => {
-        const req = { body: { comment_id: 2 } };
+        const req = { body: { comment_id: 2 }, user: { user_id: 7 } };
         const res = createResponse();
+        deleteCommentService.mockResolvedValue(1);
 
         await deleteComment(req, res);
 
         expect(checkRequiredFields).toHaveBeenCalledWith("deleteComment", req.body);
+        expect(deleteCommentService).toHaveBeenCalledWith({ comment_id: 2, user_id: 7 });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Delete Success" });
+    });
+
+    test("deleteComment does not report success when the author does not match", async () => {
+        const req = { body: { comment_id: 2 }, user: { user_id: 7 } };
+        const res = createResponse();
+        deleteCommentService.mockResolvedValue(0);
+        await deleteComment(req, res);
+        expect(res.status).toHaveBeenCalledWith(404);
     });
 });

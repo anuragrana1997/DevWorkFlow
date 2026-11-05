@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { api } from "../config/api";
 import { TaskBoard } from "../components/ticketComponents/TaskBoard";
 import { ProjectBoard } from "../components/projectComponents/ProjectBoard";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Dashboard.css";
 
 export const Dashboard = () => {
     const [view, setView] = useState("tasks");
+    const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [projects, setProjects] = useState([]);
     const [tasksLoading, setTasksLoading] = useState(true);
@@ -37,7 +39,7 @@ export const Dashboard = () => {
     }, []);
 
     useEffect(() => {
-        if (view !== "projects" || projectsLoaded) return;
+        if (projectsLoaded) return;
 
         const controller = new AbortController();
 
@@ -61,7 +63,34 @@ export const Dashboard = () => {
 
         loadProjects();
         return () => controller.abort();
-    }, [view, projectsLoaded]);
+    }, [projectsLoaded]);
+
+    const createTask = async (data) => {
+        const response = await api.post("/api/task/createTask", data);
+        setTasks((previous) => [...previous, response.data.task]);
+        return response.data.task;
+    };
+
+    const updateTask = async (taskId, changes) => {
+        await api.patch("/api/task/updateTask", { task_id: taskId, ...changes });
+        setTasks((previous) => previous.map((task) => task.task_id === taskId ? { ...task, ...changes } : task));
+    };
+
+    const createProject = async (data) => {
+        const response = await api.post("/api/project/createProject", data);
+        setProjects((previous) => [...previous, response.data.response]);
+        return response.data.response;
+    };
+
+    const updateProject = async (projectId, changes) => {
+        if (changes.project_name !== undefined) {
+            await api.patch("/api/project/updateProject", { project_id: projectId, project_name: changes.project_name });
+        }
+        if (changes.project_status !== undefined) {
+            await api.post("/api/project/changeProjectStatus", { project_id: projectId, project_status: changes.project_status });
+        }
+        setProjects((previous) => previous.map((project) => project.project_id === projectId ? { ...project, ...changes } : project));
+    };
 
     return (
         <main className="dashboard">
@@ -84,10 +113,12 @@ export const Dashboard = () => {
             </header>
 
             {view === "tasks" ? (
-                <TaskBoard tasks={tasks} loading={tasksLoading} error={tasksError} />
+                <TaskBoard tasks={tasks} projects={projects} loading={tasksLoading} error={tasksError}
+                    onCreate={createTask} onUpdate={updateTask} />
             ) : (
                 <ProjectBoard projects={projects} tasks={tasks} loading={projectsLoading}
-                    error={projectsError} tasksLoading={tasksLoading} tasksError={tasksError} />
+                    error={projectsError} tasksLoading={tasksLoading} tasksError={tasksError}
+                    canManage={user?.privilege === 1} onCreate={createProject} onUpdate={updateProject} />
             )}
         </main>
     );

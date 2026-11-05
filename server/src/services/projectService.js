@@ -30,14 +30,23 @@ export const addMemberToProjectService = async(data) => {
 };
 
 export const createProjectService = async(data) => {
-    return await Project.create({ data });
+    const project = await Project.create({ project_name: data.project_name, project_status: data.project_status ?? 0 });
+    await ProjectMembers.create({ project_id: project.project_id, user_id: data.user_id });
+    return project;
 }
 
 export const changeProjectStatusService = async(data) => {
     return await Project.update(
-        data,
+        { project_status: data.project_status },
         {
             where: { project_id: data.project_id }
         }
     );
 }
+
+export const updateProjectService = async (data) => {
+    return await Project.update(
+        { project_name: data.project_name },
+        { where: { project_id: data.project_id } }
+    );
+};

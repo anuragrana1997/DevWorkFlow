@@ -3,10 +3,13 @@ import { jest } from "@jest/globals";
 const create = jest.fn();
 const findAll = jest.fn();
 const update = jest.fn();
+const findOne = jest.fn();
+const memberFindOne = jest.fn();
 
 jest.unstable_mockModule("../../src/models/Task.js", () => ({
-    default: { create, findAll, update }
+    default: { create, findAll, update, findOne }
 }));
+jest.unstable_mockModule("../../src/models/ProjectMembers.js", () => ({ default: { findOne: memberFindOne } }));
 
 const { createTaskService, getTaskService, getAllTaskService, updateTaskService } = await import("../../src/services/taskService.js");
 
@@ -19,7 +22,15 @@ describe("taskService", () => {
 
         await createTaskService(data);
 
-        expect(create).toHaveBeenCalledWith({ data });
+        expect(create).toHaveBeenCalledWith(data);
+    });
+
+    test("refuses to create a task in an unrelated project", async () => {
+        memberFindOne.mockResolvedValue(null);
+        findOne.mockResolvedValue(null);
+        await expect(createTaskService({ task_heading: "Hidden", project_id: 4, assignee_id: 7 }))
+            .rejects.toThrow("You do not have access to this project.");
+        expect(create).not.toHaveBeenCalled();
     });
 
     test("getTaskService builds filtered query", async () => {
@@ -40,8 +51,8 @@ describe("taskService", () => {
             where: {
                 assignee_id: 7,
                 task_id: 3,
-                status: "open",
-                priority: "high"
+                task_status: "open",
+                task_priority: "high"
             },
             order: [["task_id", "DESC"]],
             offset: 5,
@@ -80,7 +91,7 @@ describe("taskService", () => {
 
         await updateTaskService(data);
 
-        expect(update).toHaveBeenCalledWith(data, {
+        expect(update).toHaveBeenCalledWith({ task_heading: "Updated" }, {
             where: { task_id: 3, assignee_id: 7 }
         });
     });

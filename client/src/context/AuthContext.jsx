@@ -18,11 +18,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     const isAuthenticated = !!token;
+    let user = null;
+    try {
+        if (token) {
+            const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+            user = JSON.parse(atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, "=")));
+        }
+    } catch {
+        user = null;
+    }
 
     return (
         <AuthContext.Provider
             value={{
                 token,
+                user,
                 isAuthenticated,
                 login,
                 logout
