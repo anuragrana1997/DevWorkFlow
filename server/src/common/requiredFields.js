@@ -6,9 +6,10 @@ const requiredFields = {
     "addMemberToProject": ["user_id", "project_id"],
     "createTask": ["task_heading"],
     "updateTask": ["task_id"],
-    "createComment": ["comment_description"],
+    "createComment": ["task_id", "comment_description"],
     "updateComment": ["user_id", "comment_id", "comment_description"],
     "createProject": ["project_name"],
+    "updateProject": ["project_id", "project_name"],
     "changeProjectStatus": ["project_id", "project_status"],
     "deleteComment": ["comment_id"],
     "createActivityLog": ["log_id", "user_id", "task_id"],
@@ -25,6 +26,7 @@ const requiredFieldsDT = {
     "project_id": "number",
     "log_id": "number",
     "project_status": "number",
+    "task_status": "number",
     "email": "string",
     "password": "string",
     "first_name": "string",
@@ -49,4 +51,4 @@ export const checkRequiredFields = (apiName, data) => {
         }
     }
     return true
-} 
+}

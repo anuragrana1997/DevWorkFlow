@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 
 const addMemberToProjectService = jest.fn();
 const changeProjectStatusService = jest.fn();
+const updateProjectService = jest.fn();
 const createProjectService = jest.fn();
 const getProjectService = jest.fn();
 const checkRequiredFields = jest.fn();
@@ -10,12 +11,13 @@ jest.unstable_mockModule("../../src/services/projectService.js", () => ({
     addMemberToProjectService,
     changeProjectStatusService,
     createProjectService,
-    getProjectService
+    getProjectService,
+    updateProjectService
 }));
 
 jest.unstable_mockModule("../../src/common/requiredFields.js", () => ({ checkRequiredFields }));
 
-const { addMemberToProject, createProject, changeProjectStatus, getProjects } = await import("../../src/controllers/projectController.js");
+const { addMemberToProject, createProject, changeProjectStatus, getProjects, updateProject } = await import("../../src/controllers/projectController.js");
 
 const createResponse = () => ({
     status: jest.fn().mockReturnThis(),
@@ -51,14 +53,14 @@ describe("projectController", () => {
     });
 
     test("createProject returns project response", async () => {
-        const req = { body: { project_name: "Jest project" } };
+        const req = { body: { project_name: "Jest project" }, user: { user_id: 7 } };
         const res = createResponse();
         const response = { project_id: 3, project_name: "Jest project" };
         createProjectService.mockResolvedValue(response);
 
         await createProject(req, res);
 
-        expect(createProjectService).toHaveBeenCalledWith(req.body);
+        expect(createProjectService).toHaveBeenCalledWith({ project_name: "Jest project", user_id: 7 });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Success", response });
     });
@@ -85,5 +87,14 @@ describe("projectController", () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({ message: "Unable to change Project Status!" });
+    });
+
+    test("updateProject changes its name", async () => {
+        const req = { body: { project_id: 3, project_name: "Renamed" } };
+        const res = createResponse();
+        updateProjectService.mockResolvedValue([1]);
+        await updateProject(req, res);
+        expect(updateProjectService).toHaveBeenCalledWith(req.body);
+        expect(res.status).toHaveBeenCalledWith(200);
     });
 });

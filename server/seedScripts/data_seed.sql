@@ -19,7 +19,7 @@ INSERT INTO users (
 ('Admin', 'Goat', 'gg@gmail.com', '$2b$10$PNmdboRQlVWDKF.Wk8Yyqu4l0o4H49lD4KZ4/7xc9E.IY/P9/MfRS', 1);
 
 -- PROJECTS
--- project_status: 0 = pending, 1 = active, 2 = completed
+-- project_status: 0 = open, 1 = in progress, 2 = complete
 INSERT INTO projects (project_name, project_status) VALUES
 ('DevWorkflow Platform', 1),
 ('Bug Tracking Dashboard', 1),
@@ -27,12 +27,12 @@ INSERT INTO projects (project_name, project_status) VALUES
 ('Legacy API Migration', 2);
 
 -- TASKS
--- task_status: 0 = pending, 1 = in progress, 2 = completed
+-- task_status: 0 = open, 1 = in progress, 2 = testing, 3 = complete, 4 = closed
 INSERT INTO tasks
 (project_id, assignee_id, task_heading, task_description, task_status)
 VALUES
-(1, 1, 'Set up Express server', 'Create the initial Node.js and Express application structure.', 2),
-(1, 2, 'Create MySQL connection pool', 'Configure MySQL connection pooling using environment variables.', 2),
+(1, 1, 'Set up Express server', 'Create the initial Node.js and Express application structure.', 3),
+(1, 2, 'Create MySQL connection pool', 'Configure MySQL connection pooling using environment variables.', 3),
 (1, 3, 'Build project API', 'Create REST endpoints for creating and retrieving projects.', 1),
 (1, 4, 'Build task API', 'Create CRUD endpoints for project tasks.', 1),
 (1, 5, 'Add authentication', 'Implement login and role-based access control.', 0),
@@ -41,8 +41,8 @@ VALUES
 (2, 8, 'Implement bug metrics', 'Display bug counts and completion statistics.', 0),
 (3, 2, 'Define analytics requirements', 'Document metrics required for the analytics tool.', 1),
 (3, 3, 'Create reporting queries', 'Write MySQL queries for project and task statistics.', 0),
-(4, 4, 'Audit legacy endpoints', 'Identify endpoints that need migration.', 2),
-(4, 5, 'Migrate user endpoints', 'Replace legacy user APIs with the new service.', 2);
+(4, 4, 'Audit legacy endpoints', 'Identify endpoints that need migration.', 3),
+(4, 5, 'Migrate user endpoints', 'Replace legacy user APIs with the new service.', 3);
 
 -- COMMENTS
 INSERT INTO comments (user_id, task_id, comment_description) VALUES

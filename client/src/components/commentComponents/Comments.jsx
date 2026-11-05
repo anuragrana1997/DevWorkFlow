@@ -1,13 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { api } from "../../config/api";
+import { useAuth } from "../../context/AuthContext";
 
 export const Comments = ({ ticketId }) => {
+    const { user } = useAuth();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editText, setEditText] = useState("");
+    const [busyId, setBusyId] = useState(null);
 
     const addComment = async () => {
         if (!newComment.trim()) return;
@@ -31,6 +36,36 @@ export const Comments = ({ ticketId }) => {
             setError(error.response?.data?.message || "Unable to add comment.");
         } finally {
             setSaving(false);
+        }
+    };
+
+    const updateComment = async (commentId) => {
+        if (!editText.trim()) return;
+        setBusyId(commentId);
+        setError("");
+        try {
+            await api.patch("/api/comment/updateComment", { comment_id: commentId, comment_description: editText.trim() });
+            setComments((previous) => previous.map((comment) => comment.comment_id === commentId
+                ? { ...comment, comment_description: editText.trim() } : comment));
+            setEditingId(null);
+        } catch (error) {
+            setError(error.response?.data?.message || "Unable to update comment.");
+        } finally {
+            setBusyId(null);
+        }
+    };
+
+    const deleteComment = async (commentId) => {
+        if (!window.confirm("Delete this comment?")) return;
+        setBusyId(commentId);
+        setError("");
+        try {
+            await api.delete("/api/comment/deleteComment", { data: { comment_id: commentId } });
+            setComments((previous) => previous.filter((comment) => comment.comment_id !== commentId));
+        } catch (error) {
+            setError(error.response?.data?.message || "Unable to delete comment.");
+        } finally {
+            setBusyId(null);
         }
     };
 
@@ -78,7 +113,18 @@ export const Comments = ({ ticketId }) => {
             <div className="ticket-comments">
                 {comments.map(comment => (
                     <div className="ticket-comment" key={comment.comment_id}>
-                        {comment.comment_description}
+                        {editingId === comment.comment_id ? <div className="comment-edit">
+                            <textarea aria-label="Edit comment" value={editText} onChange={(event) => setEditText(event.target.value)} />
+                            <div><button type="button" disabled={busyId === comment.comment_id || !editText.trim()}
+                                onClick={() => updateComment(comment.comment_id)}>Save</button>
+                                <button type="button" className="text-button" onClick={() => setEditingId(null)}>Cancel</button></div>
+                        </div> : <span>{comment.comment_description}</span>}
+                        {user?.user_id === comment.user_id && editingId !== comment.comment_id && <span className="comment-actions">
+                            <button type="button" title="Edit comment" aria-label="Edit comment" disabled={busyId === comment.comment_id}
+                                onClick={() => { setEditingId(comment.comment_id); setEditText(comment.comment_description); }}>✎</button>
+                            <button type="button" title="Delete comment" aria-label="Delete comment" disabled={busyId === comment.comment_id}
+                                onClick={() => deleteComment(comment.comment_id)}>×</button>
+                        </span>}
                     </div>
                 ))}
             </div>

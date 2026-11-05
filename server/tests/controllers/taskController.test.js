@@ -30,7 +30,7 @@ describe("taskController", () => {
     });
 
     test("createTask returns 201 when a task is created", async () => {
-        const req = { body: { task_heading: "Write tests" } };
+        const req = { body: { task_heading: "Write tests" }, user: { user_id: 7 } };
         const res = createResponse();
         const task = { task_id: 10, task_heading: "Write tests" };
         createTaskService.mockResolvedValue(task);
@@ -38,13 +38,14 @@ describe("taskController", () => {
         await createTask(req, res);
 
         expect(checkRequiredFields).toHaveBeenCalledWith("createTask", req.body);
-        expect(createTaskService).toHaveBeenCalledWith(req.body);
+        expect(createTaskService).toHaveBeenCalledWith({ task_heading: "Write tests", task_description: null,
+            task_priority: 0, task_status: 0, project_id: null, assignee_id: 7 });
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith({ message: "Task Created!", task });
     });
 
     test("createTask returns 401 when service returns no task", async () => {
-        const req = { body: { task_heading: "Write tests" } };
+        const req = { body: { task_heading: "Write tests" }, user: { user_id: 7 } };
         const res = createResponse();
         createTaskService.mockResolvedValue(null);
 
@@ -159,7 +160,7 @@ describe("taskController", () => {
         });
         expect(updateTaskService).toHaveBeenCalledWith(req.body);
         expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.json).toHaveBeenCalledWith({ message: "Task created successfully!" });
+        expect(res.json).toHaveBeenCalledWith({ message: "Task updated successfully!" });
     });
 
     test("updateTask returns 401 when no row is updated", async () => {

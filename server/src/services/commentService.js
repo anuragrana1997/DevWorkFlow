@@ -6,7 +6,7 @@ export const createCommentService = async (data) => {
 
 export const updateCommentService = async (data) => {
     return await Comment.update(
-        data,
+        { comment_description: data.comment_description },
         { 
             where: { 
                 comment_id: data.comment_id, 
@@ -23,5 +23,5 @@ export const getCommentService = async (data) => {
 };
 
 export const deleteCommentService = async (data) => {
-    return await Comment.destroy({ where: {comment_id: data.comment_id }});
+    return await Comment.destroy({ where: { comment_id: data.comment_id, user_id: data.user_id } });
 };
