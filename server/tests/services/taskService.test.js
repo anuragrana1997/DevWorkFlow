@@ -6,12 +6,16 @@ const update = jest.fn();
 const findOne = jest.fn();
 const memberFindOne = jest.fn();
 const userFindByPk = jest.fn();
+const createActivity = jest.fn();
+const transaction = jest.fn((work) => work({ id: "test-transaction" }));
 
 jest.unstable_mockModule("../../src/models/Task.js", () => ({
     default: { create, findAll, update, findOne }
 }));
 jest.unstable_mockModule("../../src/models/ProjectMembers.js", () => ({ default: { findOne: memberFindOne } }));
 jest.unstable_mockModule("../../src/models/User.js", () => ({ default: { findByPk: userFindByPk } }));
+jest.unstable_mockModule("../../src/models/ActivityLog.js", () => ({ default: { create: createActivity } }));
+jest.unstable_mockModule("../../src/config/Sequelize.js", () => ({ default: { transaction } }));
 
 const { createTaskService, getTaskService, getAllTaskService, updateTaskService } = await import("../../src/services/taskService.js");
 
@@ -25,6 +29,14 @@ describe("taskService", () => {
         await createTaskService(data);
 
         expect(create).toHaveBeenCalledWith(data);
+    });
+
+    test("creating a task records an activity event", async () => {
+        create.mockResolvedValue({ task_id: 12 });
+        await createTaskService({ task_heading: "Review", assignee_id: 7 });
+        expect(createActivity).toHaveBeenCalledWith({
+            task_id: 12, user_id: 7, log_description: "Task created.", hours_logged: 0
+        }, { transaction: { id: "test-transaction" } });
     });
 
     test("refuses to create a task in an unrelated project", async () => {
@@ -96,12 +108,29 @@ describe("taskService", () => {
 
     test("updateTaskService restricts update by task and assignee", async () => {
         const data = { task_id: 3, user_id: 7, task_heading: "Updated" };
+        findOne.mockResolvedValue({ task_heading: "Original" });
         update.mockResolvedValue([1]);
 
         await updateTaskService(data);
 
         expect(update).toHaveBeenCalledWith({ task_heading: "Updated" }, {
-            where: { task_id: 3, assignee_id: 7 }
+            where: { task_id: 3, assignee_id: 7 },
+            transaction: { id: "test-transaction" }
         });
+        expect(createActivity).toHaveBeenCalledWith(expect.objectContaining({
+            task_id: 3, user_id: 7, log_description: "Task updated: updated the title."
+        }), { transaction: { id: "test-transaction" } });
+    });
+
+    test("saving unchanged task fields does not add history", async () => {
+        findOne.mockResolvedValue({ task_heading: "Same title" });
+
+        const result = await updateTaskService({
+            task_id: 3, user_id: 7, task_heading: "Same title"
+        });
+
+        expect(result).toEqual([1]);
+        expect(update).not.toHaveBeenCalled();
+        expect(createActivity).not.toHaveBeenCalled();
     });
 });

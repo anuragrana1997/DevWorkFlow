@@ -1,6 +1,8 @@
 import Task from "../models/Task.js";
 import ProjectMembers from "../models/ProjectMembers.js";
 import User from "../models/User.js";
+import db from "../config/Sequelize.js";
+import { describeTaskChanges, recordTaskEvent } from "./taskEventService.js";
 
 const requireProjectAccess = async (projectId, userId) => {
     if (projectId == null) return;
@@ -19,7 +21,15 @@ export const createTaskService = async (data) => {
     }
     await requireProjectAccess(data.project_id, data.assignee_id);
     const { requester_id, ...taskData } = data;
-    return await Task.create(taskData);
+    const actorId = requester_id ?? data.assignee_id;
+
+    if (!actorId) return Task.create(taskData);
+
+    return db.transaction(async (transaction) => {
+        const task = await Task.create(taskData, { transaction });
+        await recordTaskEvent(task.task_id, actorId, "Task created.", transaction);
+        return task;
+    });
 };
 
 const requireAssignmentAccess = async (projectId, requesterId, assigneeId) => {
@@ -72,21 +82,35 @@ export const getAllTaskService = async (data) => {
 
 export const updateTaskService = async (data) => {
     if (data.project_id !== undefined) await requireProjectAccess(data.project_id, data.user_id);
+
+    const currentTask = await Task.findOne({
+        where: { task_id: data.task_id, assignee_id: data.user_id }
+    });
+    if (!currentTask) return [0];
+
     if (data.assignee_id !== undefined && data.assignee_id !== data.user_id) {
-        const currentTask = await Task.findOne({ where: { task_id: data.task_id, assignee_id: data.user_id } });
-        if (!currentTask) return [0];
         await requireAssignmentAccess(data.project_id === undefined ? currentTask.project_id : data.project_id, data.user_id, data.assignee_id);
     }
+
     const { task_heading, task_description, task_status, task_priority, project_id, assignee_id } = data;
     const changes = Object.fromEntries(Object.entries({ task_heading, task_description, task_status, task_priority, project_id, assignee_id })
-        .filter(([, value]) => value !== undefined));
-    return await Task.update(
-        changes,
-        {
+        .filter(([key, value]) => value !== undefined && value !== currentTask[key]));
+
+    if (Object.keys(changes).length === 0) return [1];
+
+    return db.transaction(async (transaction) => {
+        const result = await Task.update(changes, {
             where: {
-                task_id: data.task_id, 
+                task_id: data.task_id,
                 assignee_id: data.user_id
-            }
+            },
+            transaction
+        });
+
+        if (result[0] > 0) {
+            await recordTaskEvent(data.task_id, data.user_id, describeTaskChanges(changes), transaction);
         }
-    )
+
+        return result;
+    });
 };

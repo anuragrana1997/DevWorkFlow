@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import db from "../config/Sequelize.js";
 import { verifyJwt } from "../middleware/authenticateMiddleware.js";
 import { User, Project, ProjectMembers, Task, Comment, ActivityLog } from "../models/index.js";
+import { describeTaskChanges, recordTaskEvent } from "../services/taskEventService.js";
 
 const router = express.Router();
 router.use(verifyJwt);
@@ -67,8 +68,14 @@ router.post("/tasks", asyncRoute(async (req, res) => {
     if (assigneeId && !await User.findOne({ where: { user_id: assigneeId, is_active: { [Op.ne]: 0 } } })) {
         return res.status(400).json({ message: "Active assignee not found." });
     }
-    const task = await Task.create({ task_heading: task_heading.trim(), task_description, task_priority, task_status,
-        project_id: projectId, assignee_id: assigneeId });
+    const task = await db.transaction(async (transaction) => {
+        const created = await Task.create({
+            task_heading: task_heading.trim(), task_description, task_priority, task_status,
+            project_id: projectId, assignee_id: assigneeId
+        }, { transaction });
+        await recordTaskEvent(created.task_id, req.user.user_id, "Task created.", transaction);
+        return created;
+    });
     res.status(201).json({ task });
 }));
 
@@ -90,7 +97,15 @@ router.patch("/tasks/:taskId", asyncRoute(async (req, res) => {
         return res.status(400).json({ message: "Active assignee not found." });
     }
     if (changes.task_heading) changes.task_heading = changes.task_heading.trim();
-    await task.update(changes);
+    const actualChanges = Object.fromEntries(
+        Object.entries(changes).filter(([key, value]) => value !== task[key])
+    );
+    if (Object.keys(actualChanges).length === 0) return res.json({ task });
+
+    await db.transaction(async (transaction) => {
+        await task.update(actualChanges, { transaction });
+        await recordTaskEvent(task.task_id, req.user.user_id, describeTaskChanges(actualChanges), transaction);
+    });
     res.json({ task });
 }));
 

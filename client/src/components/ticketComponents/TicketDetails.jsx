@@ -14,6 +14,7 @@ export const TicketDetails = ({ ticket, projects, assignees = [], onUpdate }) =>
     const [assigneeId, setAssigneeId] = useState(ticket.assignee_id ?? "");
     const [status, setStatus] = useState(ticket.task_status);
     const [saving, setSaving] = useState(false);
+    const [historyVersion, setHistoryVersion] = useState(0);
     const [error, setError] = useState("");
 
     const save = async (event) => {
@@ -25,6 +26,7 @@ export const TicketDetails = ({ ticket, projects, assignees = [], onUpdate }) =>
                 task_priority: priority, project_id: projectId === "" ? null : Number(projectId),
                 ...(assigneeId ? { assignee_id: Number(assigneeId) } : {}) });
             setEditing(false);
+            setHistoryVersion((version) => version + 1);
         } catch (error) {
             setError(error.response?.data?.message || "Unable to update task.");
         } finally {
@@ -38,6 +40,7 @@ export const TicketDetails = ({ ticket, projects, assignees = [], onUpdate }) =>
         setError("");
         try {
             await onUpdate(ticket.task_id, { task_status: nextStatus });
+            setHistoryVersion((version) => version + 1);
         } catch (error) {
             setStatus(ticket.task_status);
             setError(error.response?.data?.message || "Unable to update status.");
@@ -80,7 +83,7 @@ export const TicketDetails = ({ ticket, projects, assignees = [], onUpdate }) =>
             </select></label>
             <button type="submit" disabled={saving || !heading.trim()}>{saving ? "Saving..." : "Save task"}</button>
         </form> : <div className="detail-section"><h3>Description</h3><p>{ticket.task_description || "No description provided."}</p></div>}
-        <TaskHistory taskId={ticket.task_id} />
+        <TaskHistory taskId={ticket.task_id} refreshVersion={historyVersion} />
         <Comments key={ticket.task_id} ticketId={ticket.task_id} />
     </div>;
 };
