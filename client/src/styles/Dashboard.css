@@ -258,6 +258,8 @@
   margin-top: 24px;
 }
 .task-history { margin-top: 24px; }
+.task-activity-form { max-width: 620px; }
+.task-activity-form label:has(input) { max-width: 180px; }
 .task-history ol { margin: 0; padding-left: 20px; }
 .task-history li { padding: 8px 0; }
 .task-history li div { display: flex; flex-wrap: wrap; gap: 12px; }

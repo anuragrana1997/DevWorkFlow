@@ -6,8 +6,9 @@ const findAdmin = jest.fn();
 const users = { findByPk: findAdmin, findAll: jest.fn(), findOne: jest.fn() };
 const projects = { findAll: jest.fn(), findByPk: jest.fn() };
 const memberships = { findAll: jest.fn(), findOne: jest.fn(), destroy: jest.fn(), create: jest.fn() };
-const tasks = { findAll: jest.fn(), count: jest.fn(), update: jest.fn() };
+const tasks = { findAll: jest.fn(), count: jest.fn(), update: jest.fn(), create: jest.fn() };
 const transaction = jest.fn((work) => work({}));
+const createEvent = jest.fn();
 
 jest.unstable_mockModule("../../src/middleware/authenticateMiddleware.js", () => ({
     verifyJwt: (req, _res, next) => { req.user = { user_id: 1, privilege: 1 }; next(); }
@@ -17,6 +18,7 @@ jest.unstable_mockModule("../../src/models/index.js", () => ({
     Comment: { destroy: jest.fn() }, ActivityLog: { destroy: jest.fn() }
 }));
 jest.unstable_mockModule("../../src/config/Sequelize.js", () => ({ default: { transaction } }));
+jest.unstable_mockModule("../../src/models/ActivityLog.js", () => ({ default: { create: createEvent } }));
 
 const { default: adminRouter } = await import("../../src/routes/adminRoutes.js");
 const app = express();
@@ -68,5 +70,14 @@ describe("admin routes", () => {
         const response = await request(app).post("/api/admin/projects/2/members").send({ member_id: 3 });
         expect(response.status).toBe(201);
         expect(memberships.create).toHaveBeenCalledWith({ project_id: 2, user_id: 3 });
+    });
+
+    test("creating an admin task records its creation", async () => {
+        tasks.create.mockResolvedValue({ task_id: 8 });
+        const response = await request(app).post("/api/admin/tasks").send({ task_heading: "Plan work" });
+        expect(response.status).toBe(201);
+        expect(createEvent).toHaveBeenCalledWith({
+            task_id: 8, user_id: 1, log_description: "Task created.", hours_logged: 0
+        }, { transaction: {} });
     });
 });
