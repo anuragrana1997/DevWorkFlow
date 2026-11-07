@@ -257,6 +257,12 @@
 .comment-container {
   margin-top: 24px;
 }
+.task-history { margin-top: 24px; }
+.task-history ol { margin: 0; padding-left: 20px; }
+.task-history li { padding: 8px 0; }
+.task-history li div { display: flex; flex-wrap: wrap; gap: 12px; }
+.task-history time, .task-history small { color: #62718b; font-size: .8rem; }
+.task-history p { margin: 5px 0; }
 
 .create-comment {
   display: flex;

@@ -4,17 +4,23 @@ import { TaskBoard } from "../components/ticketComponents/TaskBoard";
 import { ProjectBoard } from "../components/projectComponents/ProjectBoard";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Dashboard.css";
+import { Link } from "react-router-dom";
 
 export const Dashboard = () => {
     const [view, setView] = useState("tasks");
     const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
     const [projects, setProjects] = useState([]);
+    const [assignees, setAssignees] = useState([]);
     const [tasksLoading, setTasksLoading] = useState(true);
     const [projectsLoading, setProjectsLoading] = useState(false);
     const [tasksError, setTasksError] = useState("");
     const [projectsError, setProjectsError] = useState("");
     const [projectsLoaded, setProjectsLoaded] = useState(false);
+
+    useEffect(() => {
+        api.get("/api/task/assignees").then((response) => setAssignees(response.data.users || [])).catch(() => {});
+    }, []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -67,13 +73,14 @@ export const Dashboard = () => {
 
     const createTask = async (data) => {
         const response = await api.post("/api/task/createTask", data);
-        setTasks((previous) => [...previous, response.data.task]);
+        if (response.data.task.assignee_id === user?.user_id) setTasks((previous) => [...previous, response.data.task]);
         return response.data.task;
     };
 
     const updateTask = async (taskId, changes) => {
         await api.patch("/api/task/updateTask", { task_id: taskId, ...changes });
-        setTasks((previous) => previous.map((task) => task.task_id === taskId ? { ...task, ...changes } : task));
+        setTasks((previous) => previous.map((task) => task.task_id === taskId ? { ...task, ...changes } : task)
+            .filter((task) => task.assignee_id === user?.user_id));
     };
 
     const createProject = async (data) => {
@@ -99,6 +106,7 @@ export const Dashboard = () => {
                     <p className="dashboard-eyebrow">Workspace</p>
                     <h1>Dashboard</h1>
                     <p>View your assigned tasks and projects.</p>
+                    {user?.privilege === 1 && <Link to="/admin">Admin page</Link>}
                 </div>
                 <div className="dashboard-toggle" role="group" aria-label="Dashboard view">
                     <button type="button" className={view === "tasks" ? "active" : ""}
@@ -113,7 +121,7 @@ export const Dashboard = () => {
             </header>
 
             {view === "tasks" ? (
-                <TaskBoard tasks={tasks} projects={projects} loading={tasksLoading} error={tasksError}
+                <TaskBoard tasks={tasks} projects={projects} assignees={assignees} currentUserId={user?.user_id} loading={tasksLoading} error={tasksError}
                     onCreate={createTask} onUpdate={updateTask} />
             ) : (
                 <ProjectBoard projects={projects} tasks={tasks} loading={projectsLoading}

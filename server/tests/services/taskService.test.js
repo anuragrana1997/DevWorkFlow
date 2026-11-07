@@ -5,11 +5,13 @@ const findAll = jest.fn();
 const update = jest.fn();
 const findOne = jest.fn();
 const memberFindOne = jest.fn();
+const userFindByPk = jest.fn();
 
 jest.unstable_mockModule("../../src/models/Task.js", () => ({
     default: { create, findAll, update, findOne }
 }));
 jest.unstable_mockModule("../../src/models/ProjectMembers.js", () => ({ default: { findOne: memberFindOne } }));
+jest.unstable_mockModule("../../src/models/User.js", () => ({ default: { findByPk: userFindByPk } }));
 
 const { createTaskService, getTaskService, getAllTaskService, updateTaskService } = await import("../../src/services/taskService.js");
 
@@ -30,6 +32,13 @@ describe("taskService", () => {
         findOne.mockResolvedValue(null);
         await expect(createTaskService({ task_heading: "Hidden", project_id: 4, assignee_id: 7 }))
             .rejects.toThrow("You do not have access to this project.");
+        expect(create).not.toHaveBeenCalled();
+    });
+
+    test("requires a project before assigning a task to another member", async () => {
+        userFindByPk.mockResolvedValue({ user_id: 8, is_active: 1 });
+        await expect(createTaskService({ task_heading: "Review", requester_id: 7, assignee_id: 8, project_id: null }))
+            .rejects.toThrow("Select a project");
         expect(create).not.toHaveBeenCalled();
     });
 

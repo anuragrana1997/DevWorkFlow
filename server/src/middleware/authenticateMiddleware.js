@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export const createJwT = async (userData) => {
     return jwt.sign(
@@ -13,7 +14,7 @@ export const createJwT = async (userData) => {
     );
 }
 
-export const verifyJwt = (req, res, next) => {
+export const verifyJwt = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if(!authHeader) {
@@ -26,13 +27,13 @@ export const verifyJwt = (req, res, next) => {
 
         const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = decodedData;
+        const currentUser = await User.findByPk(decodedData.user_id, { attributes: ["user_id", "privilege", "is_active"] });
+        if (!currentUser || currentUser.is_active === 0) {
+            return res.status(401).json({ message: "Account is inactive or unavailable." });
+        }
+        req.user = { user_id: currentUser.user_id, privilege: currentUser.privilege };
         req.body ??= {};
         req.body.user_id = decodedData.user_id;
-        // return res.status(201).json({
-        //     message: "Token Verfied!",
-        //     decodedData
-        // });
         next();
     } catch (error) {
         return res.status(401).json({

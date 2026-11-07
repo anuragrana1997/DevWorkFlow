@@ -1,0 +1,22 @@
+.admin-page { min-height: 100vh; }
+.admin-page a { color: #37438a; font-weight: 600; }
+.admin-tabs { width: fit-content; flex-wrap: wrap; margin-bottom: 22px; }
+.admin-panel { max-width: 1080px; padding: 24px; border: 1px solid #e0e6f0; border-radius: 14px; background: #fff; }
+.admin-panel h2 { margin: 0 0 14px; color: #162b50; }
+.admin-panel h2:not(:first-child) { margin-top: 30px; }
+.admin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 760px; gap: 14px; }
+.admin-form label { min-width: 0; }
+.admin-form label:has(textarea) { grid-column: 1 / -1; }
+.admin-actions { display: flex; gap: 10px; align-items: end; }
+.admin-list { display: flex; flex-direction: column; gap: 8px; }
+.admin-row { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid #e0e6f0; border-radius: 9px; }
+.admin-row > div:first-child { flex: 1; min-width: 0; }
+.admin-row small { display: block; margin-top: 4px; color: #62718b; overflow-wrap: anywhere; }
+.admin-row label, .admin-project-select { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+.admin-row select, .admin-project-select select { padding: 7px; border: 1px solid #cdd7e7; border-radius: 7px; background: #fff; color: #22304a; }
+.admin-row button, .admin-actions button { padding: 8px 12px; border: 1px solid #cdd7e7; border-radius: 7px; background: #fff; color: #37438a; cursor: pointer; }
+.admin-row .admin-danger { color: #a52836; border-color: #e7bfc4; }
+.admin-notice { color: #246043; }
+.admin-project-select { margin-bottom: 20px; }
+.admin-page button:disabled, .admin-page select:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 740px) { .admin-form { grid-template-columns: 1fr; } .admin-row { flex-wrap: wrap; } .admin-row > div:first-child { flex-basis: 100%; } }
