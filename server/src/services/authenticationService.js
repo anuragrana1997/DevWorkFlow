@@ -37,6 +37,11 @@ export const loginUserService = async (data) => {
     if(!userData) {
         throw new Error("User Doesn't Exist");
     }
+    if (userData.is_active === 0) {
+        const error = new Error("Account is inactive.");
+        error.statusCode = 403;
+        throw error;
+    }
     const isPasswordMatches = await bcrypt.compare(
         password,
         userData.hashed_password

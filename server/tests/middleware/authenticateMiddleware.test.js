@@ -2,10 +2,12 @@ import { jest } from "@jest/globals";
 
 const sign = jest.fn();
 const verify = jest.fn();
+const findByPk = jest.fn();
 
 jest.unstable_mockModule("jsonwebtoken", () => ({
     default: { sign, verify }
 }));
+jest.unstable_mockModule("../../src/models/User.js", () => ({ default: { findByPk } }));
 
 const { createJwT, verifyJwt } = await import("../../src/middleware/authenticateMiddleware.js");
 
@@ -34,33 +36,34 @@ describe("authenticateMiddleware", () => {
         expect(result).toBe("signed-token");
     });
 
-    test("verifyJwt returns 401 when authorization header is missing", () => {
+    test("verifyJwt returns 401 when authorization header is missing", async () => {
         const req = { headers: {} };
         const res = createResponse();
         const next = jest.fn();
 
-        verifyJwt(req, res, next);
+        await verifyJwt(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({ message: "Token Required!" });
         expect(next).not.toHaveBeenCalled();
     });
 
-    test("verifyJwt stores decoded token and calls next", () => {
+    test("verifyJwt loads current privilege and calls next", async () => {
         const req = { headers: { authorization: "Bearer abc123" } };
         const res = createResponse();
         const next = jest.fn();
         const decoded = { user_id: 5, privilege: 1 };
         verify.mockReturnValue(decoded);
+        findByPk.mockResolvedValue({ user_id: 5, privilege: 2, is_active: 1 });
 
-        verifyJwt(req, res, next);
+        await verifyJwt(req, res, next);
 
         expect(verify).toHaveBeenCalledWith("abc123", "test-secret");
-        expect(req.user).toEqual(decoded);
+        expect(req.user).toEqual({ user_id: 5, privilege: 2 });
         expect(next).toHaveBeenCalledTimes(1);
     });
 
-    test("verifyJwt returns 401 for invalid token", () => {
+    test("verifyJwt returns 401 for invalid token", async () => {
         const req = { headers: { authorization: "Bearer invalid" } };
         const res = createResponse();
         const next = jest.fn();
@@ -68,10 +71,21 @@ describe("authenticateMiddleware", () => {
             throw new Error("invalid token");
         });
 
-        verifyJwt(req, res, next);
+        await verifyJwt(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({ message: "Invalid or expired Token" });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    test("verifyJwt rejects a removed member's existing token", async () => {
+        const req = { headers: { authorization: "Bearer abc123" } };
+        const res = createResponse();
+        const next = jest.fn();
+        verify.mockReturnValue({ user_id: 5, privilege: 1 });
+        findByPk.mockResolvedValue({ user_id: 5, privilege: 1, is_active: 0 });
+        await verifyJwt(req, res, next);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(next).not.toHaveBeenCalled();
     });
 });

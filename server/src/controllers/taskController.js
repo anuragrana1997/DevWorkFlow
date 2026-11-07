@@ -11,13 +11,17 @@ export const createTask = async (req, res) => {
         if (req.body.project_id !== undefined && (!Number.isInteger(req.body.project_id) || req.body.project_id < 1)) {
             return res.status(400).json({ message: "Invalid project." });
         }
+        if (req.body.assignee_id !== undefined && (!Number.isInteger(req.body.assignee_id) || req.body.assignee_id < 1)) {
+            return res.status(400).json({ message: "Invalid assignee." });
+        }
         const task = await createTaskService({
             task_heading: req.body.task_heading.trim(),
             task_description: req.body.task_description ?? null,
             task_priority: req.body.task_priority ?? 0,
             task_status: req.body.task_status ?? 0,
             project_id: req.body.project_id ?? null,
-            assignee_id: req.user.user_id
+            assignee_id: req.body.assignee_id ?? req.user.user_id,
+            ...(req.body.assignee_id !== undefined ? { requester_id: req.user.user_id } : {})
         });
         if(!task) {
             throw new Error("Task creation failed!");
@@ -97,6 +101,9 @@ export const updateTask = async (req, res) => {
         }
         if (req.body.project_id != null && (!Number.isInteger(req.body.project_id) || req.body.project_id < 1)) {
             return res.status(400).json({ message: "Invalid project." });
+        }
+        if (req.body.assignee_id !== undefined && (!Number.isInteger(req.body.assignee_id) || req.body.assignee_id < 1)) {
+            return res.status(400).json({ message: "Invalid assignee." });
         }
         const [updatedRows] = await updateTaskService(req.body);
         if(!updatedRows) {

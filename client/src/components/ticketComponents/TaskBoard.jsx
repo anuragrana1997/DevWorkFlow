@@ -2,15 +2,17 @@ import { useState } from "react";
 import { TicketStat } from "./TicketStat";
 import { TicketDetails } from "./TicketDetails";
 
-export const TaskBoard = ({ tasks, projects, loading, error, onCreate, onUpdate }) => {
+export const TaskBoard = ({ tasks, projects, assignees = [], currentUserId, loading, error, onCreate, onUpdate }) => {
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [creating, setCreating] = useState(false);
     const [heading, setHeading] = useState("");
     const [description, setDescription] = useState("");
     const [projectId, setProjectId] = useState("");
     const [priority, setPriority] = useState(0);
+    const [assigneeId, setAssigneeId] = useState(currentUserId ?? "");
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState("");
+    const [notice, setNotice] = useState("");
     const selectedTask = tasks.find((task) => task.task_id === selectedTaskId);
 
     const submit = async (event) => {
@@ -18,14 +20,18 @@ export const TaskBoard = ({ tasks, projects, loading, error, onCreate, onUpdate 
         if (!heading.trim()) return;
         setSaving(true);
         setFormError("");
+        setNotice("");
         try {
             const task = await onCreate({ task_heading: heading.trim(), task_description: description.trim(), task_priority: priority,
-                ...(projectId ? { project_id: Number(projectId) } : {}) });
-            setSelectedTaskId(task.task_id);
+                ...(projectId ? { project_id: Number(projectId) } : {}),
+                ...(assigneeId ? { assignee_id: Number(assigneeId) } : {}) });
+            if (task.assignee_id === currentUserId) setSelectedTaskId(task.task_id);
+            else setNotice(`Task #${task.task_id} created and assigned to another member.`);
             setHeading("");
             setDescription("");
             setProjectId("");
             setPriority(0);
+            setAssigneeId(currentUserId ?? "");
             setCreating(false);
         } catch (error) {
             setFormError(error.response?.data?.message || "Unable to create task.");
@@ -50,9 +56,15 @@ export const TaskBoard = ({ tasks, projects, loading, error, onCreate, onUpdate 
                 <label>Priority<select value={priority} onChange={(event) => setPriority(Number(event.target.value))}>
                     <option value={0}>Low</option><option value={1}>Medium</option><option value={2}>High</option>
                 </select></label>
+                <label>Assignee<select value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}>
+                    {assignees.length === 0 && <option value={currentUserId}>Me</option>}
+                    {assignees.map((user) => <option key={user.user_id} value={user.user_id}>{user.first_name} {user.last_name}</option>)}
+                </select></label>
+                <small>To assign someone else, select a project they belong to.</small>
                 {formError && <p className="panel-error" role="alert">{formError}</p>}
                 <button type="submit" disabled={saving}>{saving ? "Creating..." : "Create task"}</button>
             </form>}
+            {notice && <p className="panel-message" role="status">{notice}</p>}
             {loading && <p className="panel-message">Loading tasks...</p>}
             {error && <p className="panel-message panel-error" role="alert">{error}</p>}
             {!loading && !error && tasks.length === 0 && <p className="panel-message">No tasks are assigned to you yet.</p>}
@@ -62,7 +74,7 @@ export const TaskBoard = ({ tasks, projects, loading, error, onCreate, onUpdate 
                 <TicketStat ticket={task} /></button>)}</div>
         </aside>
         <section className="dashboard-detail" aria-label="Task details">
-            {selectedTask ? <TicketDetails key={selectedTask.task_id} ticket={selectedTask} projects={projects} onUpdate={onUpdate} /> :
+            {selectedTask ? <TicketDetails key={selectedTask.task_id} ticket={selectedTask} projects={projects} assignees={assignees} onUpdate={onUpdate} /> :
                 <div className="detail-placeholder"><h2>Task details</h2><p>Select a task to view its details and comments.</p></div>}
         </section>
     </div>;
